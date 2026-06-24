@@ -697,7 +697,7 @@ function PortfolioModal({ holdings, onSave, onClose }) {
           <div className="search-hint" style={{ marginTop: 0 }}>
             종목코드·수량·평단가를 입력하세요. 코드 예: <b>AAPL</b>(애플), <b>005930.KS</b>(삼성전자), <b>035720.KS</b>(카카오).
             평단가는 비워도 되지만, 넣으면 손익까지 계산해요. 미국주는 달러, 한국주는 원 기준.
-            <br />코드를 모르면 ‘＋ 종목 추가/검색’으로 확인하거나, 증권앱 스크린샷을 채팅에 올려 주세요 — 제가 채워드립니다.
+            <br />종목코드를 모르면 위 ‘＋ 종목 추가/검색’에서 검색해 확인하세요.
           </div>
           <div className="pf-edit-row pf-edit-head">
             <span>종목코드</span><span>수량(주)</span><span>평단가</span><span></span>
@@ -983,7 +983,7 @@ export default function Page() {
             보유 중인 종목을 넣으면 <b>평가금액·손익·비중·국가 배분</b>을 실시간으로 분석해 드려요.<br />
             <button className="add-btn" style={{ marginTop: 10 }} onClick={() => setShowPf(true)}>＋ 보유종목 추가하기</button>
             <div style={{ marginTop: 10, fontSize: 11.5, color: "var(--dim)" }}>
-              증권앱 스크린샷을 채팅에 올려주시면 제가 대신 채워드릴 수도 있어요. (데이터는 이 브라우저에만 저장)
+              종목코드는 위 ‘관심 종목’의 ‘＋ 종목 추가/검색’에서 확인할 수 있어요. 입력한 보유 정보는 이 브라우저에만 저장됩니다.
             </div>
           </div>
         ) : pf ? (
