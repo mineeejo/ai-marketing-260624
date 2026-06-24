@@ -717,6 +717,69 @@ function parseHoldingsFromText(text) {
   return out;
 }
 
+// OCR 정확도 향상을 위한 이미지 전처리: 업스케일 + 흑백 이진화(Otsu) + 다크모드 자동 반전
+async function preprocessImage(file) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((res, rej) => {
+      const im = new Image();
+      im.onload = () => res(im);
+      im.onerror = rej;
+      im.src = url;
+    });
+    const srcW = img.naturalWidth || img.width;
+    const srcH = img.naturalHeight || img.height;
+    if (!srcW || !srcH) return file;
+    const scale = Math.min(3, Math.max(1, 1600 / srcW)); // 작은 이미지는 확대, 과도한 확대는 제한
+    const w = Math.round(srcW * scale);
+    const h = Math.round(srcH * scale);
+    const cv = document.createElement("canvas");
+    cv.width = w; cv.height = h;
+    const ctx = cv.getContext("2d", { willReadFrequently: true });
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(img, 0, 0, w, h);
+
+    const id = ctx.getImageData(0, 0, w, h);
+    const d = id.data;
+    const n = w * h;
+    const lum = new Uint8Array(n);
+    let sum = 0;
+    for (let i = 0, p = 0; i < d.length; i += 4, p++) {
+      const g = (d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114) | 0;
+      lum[p] = g; sum += g;
+    }
+    const avg = sum / n;
+    // Otsu 임계값
+    const hist = new Array(256).fill(0);
+    for (let p = 0; p < n; p++) hist[lum[p]]++;
+    let sumAll = 0;
+    for (let t = 0; t < 256; t++) sumAll += t * hist[t];
+    let wB = 0, sumB = 0, maxVar = -1, thr = 128;
+    for (let t = 0; t < 256; t++) {
+      wB += hist[t]; if (!wB) continue;
+      const wF = n - wB; if (!wF) break;
+      sumB += t * hist[t];
+      const mB = sumB / wB, mF = (sumAll - sumB) / wF;
+      const between = wB * wF * (mB - mF) * (mB - mF);
+      if (between > maxVar) { maxVar = between; thr = t; }
+    }
+    const dark = avg < 128; // 어두운 배경(흰 글씨) → 반전 필요
+    for (let i = 0, p = 0; i < d.length; i += 4, p++) {
+      let v = lum[p] > thr ? 255 : 0;
+      if (dark) v = 255 - v; // 글자를 '밝은 배경의 검은 글씨'로
+      d[i] = d[i + 1] = d[i + 2] = v; d[i + 3] = 255;
+    }
+    ctx.putImageData(id, 0, 0);
+    const blob = await new Promise((r) => cv.toBlob(r, "image/png"));
+    return blob || file;
+  } catch {
+    return file;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
 function PortfolioModal({ holdings, onSave, onClose }) {
   const [rows, setRows] = useState(
     holdings.length ? holdings.map((h) => ({ symbol: h.symbol, qty: String(h.qty ?? ""), avg: h.avg != null ? String(h.avg) : "" })) : [emptyHolding()]
@@ -736,16 +799,23 @@ function PortfolioModal({ holdings, onSave, onClose }) {
     if (!file) return;
     setOcrBusy(true);
     setOcrText("");
-    setOcrMsg("이미지 준비 중…");
+    setOcrMsg("이미지 보정 중… (확대·선명화)");
+    let worker;
     try {
       const Tesseract = (await import("tesseract.js")).default;
-      const { data } = await Tesseract.recognize(file, "kor+eng", {
+      const img = await preprocessImage(file);
+      worker = await Tesseract.createWorker("kor+eng", 1, {
         logger: (m) => {
           if (m.status === "recognizing text") setOcrMsg(`글자 인식 중… ${Math.round(m.progress * 100)}%`);
           else if (m.status && m.status.includes("traineddata")) setOcrMsg("언어 데이터 불러오는 중… (처음 한 번)");
-          else setOcrMsg("처리 중…");
         },
       });
+      await worker.setParameters({
+        tessedit_pageseg_mode: "6", // 한 덩어리의 텍스트로 가정(표/목록 화면에 적합)
+        preserve_interword_spaces: "1",
+        user_defined_dpi: "300",
+      });
+      const { data } = await worker.recognize(img);
       const txt = (data && data.text) || "";
       setOcrText(txt);
       const cands = parseHoldingsFromText(txt);
@@ -759,13 +829,14 @@ function PortfolioModal({ holdings, onSave, onClose }) {
           const merged = [...existing, ...add];
           return merged.length ? merged : [emptyHolding()];
         });
-        setOcrMsg(`종목 ${cands.length}개를 찾았어요. 아래에서 수량·평단가를 꼭 확인·수정하세요.`);
+        setOcrMsg(`종목 ${cands.length}개를 찾았어요. 수량·평단가는 꼭 확인·수정하세요.`);
       } else {
-        setOcrMsg("종목을 자동으로 못 찾았어요. 아래 ‘인식된 원문’을 참고해 직접 입력하거나 다시 시도해 주세요.");
+        setOcrMsg("종목을 자동으로 못 찾았어요. 아래 ‘인식된 원문’을 참고해 직접 입력하거나, 더 크고 선명한 캡처로 다시 시도해 주세요.");
       }
     } catch (err) {
       setOcrMsg("OCR 실패: " + (err && err.message ? err.message : String(err)));
     } finally {
+      if (worker) { try { await worker.terminate(); } catch {} }
       setOcrBusy(false);
       if (fileRef.current) fileRef.current.value = "";
     }
@@ -794,8 +865,9 @@ function PortfolioModal({ holdings, onSave, onClose }) {
             </button>
             {ocrMsg && <span className="ocr-msg">{ocrMsg}</span>}
             <div className="ocr-hint">
-              보유종목 화면을 캡처해 올리면 종목·수량·평단가를 자동으로 채워 넣어요. 브라우저 안에서만 인식하며(외부 전송·키 없음),
-              <b> 인식은 부정확할 수 있으니 아래 표에서 꼭 확인·수정</b>하세요.
+              보유종목 화면을 캡처해 올리면 종목·수량·평단가를 자동으로 채워 넣어요. 브라우저 안에서만 인식하며(외부 전송·키 없음).
+              <br />🎯 정확도 팁: <b>보유목록 부분만 잘라서</b>, <b>글자가 크게 보이게</b> 캡처할수록 잘 읽혀요. 다크모드 화면도 자동 보정합니다.
+              <b> 인식은 완벽하지 않으니 아래 표에서 꼭 확인·수정</b>하세요.
             </div>
             {ocrText && (
               <details className="ocr-raw">
