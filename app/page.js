@@ -11,6 +11,7 @@ import {
   TAGLINES,
   GLOSSARY,
   TIPS,
+  KR_STOCKS,
 } from "./lib/symbols";
 
 const REFRESH_MS = 30000;
@@ -668,15 +669,107 @@ function computePortfolio(holdings, quotes, usdkrw) {
 
 const emptyHolding = () => ({ symbol: "", qty: "", avg: "" });
 
+// 알려진 미국 티커(영문 인식 매칭용)
+const US_KNOWN = new Set(US_PRESET.map((s) => s.symbol));
+
+// OCR로 읽은 텍스트에서 보유종목 후보(코드·수량·평단가)를 최대한 추출.
+// 부정확할 수 있어 사용자가 표에서 확인/수정하는 전제.
+function parseHoldingsFromText(text) {
+  const lines = (text || "").split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  const out = [];
+  const seen = new Set();
+  for (const line of lines) {
+    let symbol = null;
+    const codeM = line.match(/\b(\d{6})\b/);
+    if (codeM) {
+      const code = codeM[1];
+      const hit = KR_STOCKS.find((s) => s.symbol.startsWith(code));
+      symbol = hit ? hit.symbol : code + ".KS";
+    }
+    if (!symbol) {
+      const compact = line.replace(/\s/g, "");
+      const hit = KR_STOCKS.find((s) => {
+        const ko = s.ko.split(" ")[0].replace(/\s/g, "");
+        return ko.length >= 2 && compact.includes(ko);
+      });
+      if (hit) symbol = hit.symbol;
+    }
+    if (!symbol) {
+      const um = line.match(/\b([A-Z]{2,5})\b/);
+      if (um && US_KNOWN.has(um[1])) symbol = um[1];
+    }
+    if (!symbol || seen.has(symbol)) continue;
+
+    const rawNums = line.match(/\d[\d,]*(?:\.\d+)?/g) || [];
+    const nums = rawNums
+      .map((n) => Number(n.replace(/,/g, "")))
+      .filter((n) => !Number.isNaN(n) && (!codeM || String(n) !== codeM[1]));
+    let qty = "", avg = "";
+    if (nums.length) {
+      const ints = nums.filter((n) => Number.isInteger(n) && n > 0 && n < 100000);
+      if (ints.length) qty = String(Math.min(...ints));
+      const prices = nums.filter((n) => n >= 100);
+      if (prices.length) avg = String(Math.max(...prices));
+    }
+    seen.add(symbol);
+    out.push({ symbol, qty, avg });
+  }
+  return out;
+}
+
 function PortfolioModal({ holdings, onSave, onClose }) {
   const [rows, setRows] = useState(
     holdings.length ? holdings.map((h) => ({ symbol: h.symbol, qty: String(h.qty ?? ""), avg: h.avg != null ? String(h.avg) : "" })) : [emptyHolding()]
   );
+  const [ocrBusy, setOcrBusy] = useState(false);
+  const [ocrMsg, setOcrMsg] = useState("");
+  const [ocrText, setOcrText] = useState("");
+  const fileRef = useRef(null);
   useEscClose(onClose);
 
   const update = (i, key, val) => setRows((p) => p.map((r, j) => (j === i ? { ...r, [key]: val } : r)));
   const addRow = () => setRows((p) => [...p, emptyHolding()]);
   const delRow = (i) => setRows((p) => p.filter((_, j) => j !== i));
+
+  const onPickFile = async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setOcrBusy(true);
+    setOcrText("");
+    setOcrMsg("이미지 준비 중…");
+    try {
+      const Tesseract = (await import("tesseract.js")).default;
+      const { data } = await Tesseract.recognize(file, "kor+eng", {
+        logger: (m) => {
+          if (m.status === "recognizing text") setOcrMsg(`글자 인식 중… ${Math.round(m.progress * 100)}%`);
+          else if (m.status && m.status.includes("traineddata")) setOcrMsg("언어 데이터 불러오는 중… (처음 한 번)");
+          else setOcrMsg("처리 중…");
+        },
+      });
+      const txt = (data && data.text) || "";
+      setOcrText(txt);
+      const cands = parseHoldingsFromText(txt);
+      if (cands.length) {
+        setRows((prev) => {
+          const existing = prev.filter((r) => r.symbol.trim());
+          const have = new Set(existing.map((r) => r.symbol.trim().toUpperCase()));
+          const add = cands
+            .filter((c) => !have.has(c.symbol.toUpperCase()))
+            .map((c) => ({ symbol: c.symbol, qty: c.qty || "", avg: c.avg || "" }));
+          const merged = [...existing, ...add];
+          return merged.length ? merged : [emptyHolding()];
+        });
+        setOcrMsg(`종목 ${cands.length}개를 찾았어요. 아래에서 수량·평단가를 꼭 확인·수정하세요.`);
+      } else {
+        setOcrMsg("종목을 자동으로 못 찾았어요. 아래 ‘인식된 원문’을 참고해 직접 입력하거나 다시 시도해 주세요.");
+      }
+    } catch (err) {
+      setOcrMsg("OCR 실패: " + (err && err.message ? err.message : String(err)));
+    } finally {
+      setOcrBusy(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
 
   const save = () => {
     const clean = rows
@@ -694,8 +787,26 @@ function PortfolioModal({ holdings, onSave, onClose }) {
           <button className="modal-close" onClick={onClose}>✕ 닫기</button>
         </div>
         <div className="modal-body">
+          <div className="ocr-box">
+            <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={onPickFile} />
+            <button className="add-btn" disabled={ocrBusy} onClick={() => fileRef.current && fileRef.current.click()}>
+              📷 증권앱 스크린샷에서 불러오기
+            </button>
+            {ocrMsg && <span className="ocr-msg">{ocrMsg}</span>}
+            <div className="ocr-hint">
+              보유종목 화면을 캡처해 올리면 종목·수량·평단가를 자동으로 채워 넣어요. 브라우저 안에서만 인식하며(외부 전송·키 없음),
+              <b> 인식은 부정확할 수 있으니 아래 표에서 꼭 확인·수정</b>하세요.
+            </div>
+            {ocrText && (
+              <details className="ocr-raw">
+                <summary>인식된 원문 보기</summary>
+                <pre>{ocrText}</pre>
+              </details>
+            )}
+          </div>
+
           <div className="search-hint" style={{ marginTop: 0 }}>
-            종목코드·수량·평단가를 입력하세요. 코드 예: <b>AAPL</b>(애플), <b>005930.KS</b>(삼성전자), <b>035720.KS</b>(카카오).
+            또는 직접 입력 — 코드 예: <b>AAPL</b>(애플), <b>005930.KS</b>(삼성전자), <b>035720.KS</b>(카카오).
             평단가는 비워도 되지만, 넣으면 손익까지 계산해요. 미국주는 달러, 한국주는 원 기준.
             <br />종목코드를 모르면 위 ‘＋ 종목 추가/검색’에서 검색해 확인하세요.
           </div>
