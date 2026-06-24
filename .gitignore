@@ -36,3 +36,6 @@ next-env.d.ts
 
 # editor / tooling
 .claude
+
+# 무관한 별도 프로젝트(미리보기용) — 이 저장소에 포함하지 않음
+/quietpress

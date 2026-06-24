@@ -1021,6 +1021,189 @@ body {
   white-space: nowrap;
 }
 
+/* ===== 보유 포트폴리오 ===== */
+.pf-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.pf-sum-card {
+  background: linear-gradient(180deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px 14px;
+}
+.pf-sum-k {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+.pf-sum-v {
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.pf-sum-sub {
+  font-family: var(--mono);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.pf-alloc {
+  margin: 4px 0 14px;
+}
+.pf-alloc-bar {
+  display: flex;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.pf-alloc-us {
+  background: rgba(77, 139, 255, 0.55);
+}
+.pf-alloc-kr {
+  background: rgba(255, 77, 77, 0.5);
+}
+.pf-alloc-legend {
+  display: flex;
+  gap: 16px;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+.pf-warn {
+  font-size: 12px;
+  color: #ffd23f;
+  background: rgba(255, 210, 63, 0.08);
+  border: 1px solid rgba(255, 210, 63, 0.3);
+  border-radius: 5px;
+  padding: 9px 12px;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.pf-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px;
+}
+.pf-card {
+  background: linear-gradient(180deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px 13px;
+  cursor: pointer;
+}
+.pf-card:hover {
+  border-color: var(--accent);
+}
+.pf-card.up { border-left: 3px solid var(--up); }
+.pf-card.down { border-left: 3px solid var(--down); }
+.pf-card.flat { border-left: 3px solid var(--flat); }
+.pf-card.nodata { border-left: 3px solid var(--dim); }
+.pf-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 7px;
+}
+.pf-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+.pf-weight {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+.pf-value {
+  font-family: var(--mono);
+  font-size: 17px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.pf-krw {
+  font-size: 11px;
+  color: var(--dim);
+}
+.pf-pl {
+  font-family: var(--mono);
+  font-size: 13px;
+  margin-top: 3px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.pf-detail {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--dim);
+  margin-top: 7px;
+  border-top: 1px solid var(--border);
+  padding-top: 6px;
+}
+
+.pf-empty {
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  padding: 22px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+/* 포트폴리오 편집 폼 */
+.pf-edit-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1.2fr 30px;
+  gap: 6px;
+  margin-bottom: 7px;
+  align-items: center;
+}
+.pf-edit-head {
+  font-size: 10.5px;
+  color: var(--dim);
+}
+.pf-input {
+  width: 100%;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 7px 8px;
+  border-radius: 4px;
+  outline: none;
+}
+.pf-input:focus { border-color: var(--accent); }
+.pf-row-del {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  height: 30px;
+}
+.pf-row-del:hover { border-color: var(--down); color: var(--down); }
+.pf-add-row {
+  background: var(--panel-2);
+  border: 1px dashed var(--border);
+  color: var(--accent);
+  font-family: inherit;
+  font-size: 12px;
+  padding: 8px;
+  width: 100%;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 4px;
+}
+.pf-add-row:hover { border-color: var(--accent); }
+
 /* ============================================================
    모바일 대응
    ============================================================ */
@@ -1116,6 +1299,37 @@ body {
   }
   .mover-name {
     max-width: 80px;
+  }
+  .pf-summary {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .pf-sum-card {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 10px 12px;
+  }
+  .pf-sum-k {
+    margin-bottom: 0;
+  }
+  .pf-sum-v {
+    font-size: 16px;
+  }
+  .pf-board {
+    grid-template-columns: 1fr;
+  }
+  .pf-alloc-legend {
+    flex-direction: column;
+    gap: 3px;
+  }
+  .pf-edit-row {
+    grid-template-columns: 1.3fr 0.8fr 1fr 28px;
+    gap: 4px;
+  }
+  .pf-input {
+    font-size: 12px;
+    padding: 6px;
   }
   .summary-box {
     font-size: 12.5px;

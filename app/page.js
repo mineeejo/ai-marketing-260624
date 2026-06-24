@@ -15,6 +15,7 @@ import {
 
 const REFRESH_MS = 30000;
 const STORAGE_KEY = "watchlist_v2";
+const PF_KEY = "portfolio_v1";
 const MAX_WATCH = 40;
 
 const FIXED_GROUPS = [
@@ -600,6 +601,126 @@ function GuideModal({ onClose }) {
   );
 }
 
+/* ---------- 보유 포트폴리오 ---------- */
+function fmtKRW(v) {
+  if (v == null || Number.isNaN(v)) return "—";
+  const sign = v < 0 ? "-" : "";
+  return `${sign}₩${Math.round(Math.abs(v)).toLocaleString("ko-KR")}`;
+}
+function fmtKRWsigned(v) {
+  if (v == null || Number.isNaN(v)) return "—";
+  const sign = v > 0 ? "+" : v < 0 ? "-" : "";
+  return `${sign}₩${Math.round(Math.abs(v)).toLocaleString("ko-KR")}`;
+}
+
+// 보유종목 + 실시간 시세 + 환율로 포트폴리오 분석 계산
+function computePortfolio(holdings, quotes, usdkrw) {
+  let totalValueKRW = 0, valUS = 0, valKR = 0;
+  let plKRW = 0, costForPLKRW = 0, todayKRW = 0;
+  let hasUnknownFx = false;
+
+  const rows = holdings.map((h) => {
+    const q = quotes[h.symbol];
+    const ok = q && q.ok;
+    const cur = ok ? q.currency : isKorean(h.symbol) ? "KRW" : "USD";
+    const isUSD = cur === "USD" || (cur !== "KRW" && !isKorean(h.symbol));
+    const toKRW = (v) => {
+      if (v == null) return null;
+      if (!isUSD) return v;
+      if (!usdkrw) { hasUnknownFx = true; return null; }
+      return v * usdkrw;
+    };
+    const price = ok ? q.price : null;
+    const qty = Number(h.qty) || 0;
+    const avg = h.avg != null && h.avg !== "" ? Number(h.avg) : null;
+    const value = price != null ? price * qty : null;
+    const plNative = price != null && avg != null ? (price - avg) * qty : null;
+    const plPct = price != null && avg ? ((price - avg) / avg) * 100 : null;
+    const todayNative = ok && q.change != null ? q.change * qty : null;
+    const valueKRW = toKRW(value);
+
+    if (valueKRW != null) {
+      totalValueKRW += valueKRW;
+      if (isUSD) valUS += valueKRW; else valKR += valueKRW;
+    }
+    if (plNative != null) { plKRW += toKRW(plNative) || 0; costForPLKRW += toKRW(avg * qty) || 0; }
+    if (todayNative != null) todayKRW += toKRW(todayNative) || 0;
+
+    const name = (ok && q.name) || h.label || h.symbol;
+    return { ...h, name, qty, avg, ok, cur, isUSD, price, value, plNative, plPct, today: todayNative, valueKRW, change: ok ? q.change : null };
+  });
+
+  rows.forEach((r) => { r.weight = r.valueKRW != null && totalValueKRW > 0 ? (r.valueKRW / totalValueKRW) * 100 : null; });
+  rows.sort((a, b) => (b.valueKRW || 0) - (a.valueKRW || 0));
+
+  const totalPLpct = costForPLKRW > 0 ? (plKRW / costForPLKRW) * 100 : null;
+  const top = rows.find((r) => r.weight != null);
+  const warn = top && top.weight > 40
+    ? `‘${top.name}’ 한 종목이 전체의 ${top.weight.toFixed(0)}%예요. 특정 종목 비중이 높으면 위험도 커집니다 — 분산을 고려해 보세요.`
+    : null;
+
+  return {
+    rows, totalValueKRW, totalPLKRW: plKRW, totalPLpct, todayKRW,
+    valUS, valKR, hasUnknownFx, warn,
+    hasCost: costForPLKRW > 0,
+  };
+}
+
+const emptyHolding = () => ({ symbol: "", qty: "", avg: "" });
+
+function PortfolioModal({ holdings, onSave, onClose }) {
+  const [rows, setRows] = useState(
+    holdings.length ? holdings.map((h) => ({ symbol: h.symbol, qty: String(h.qty ?? ""), avg: h.avg != null ? String(h.avg) : "" })) : [emptyHolding()]
+  );
+  useEscClose(onClose);
+
+  const update = (i, key, val) => setRows((p) => p.map((r, j) => (j === i ? { ...r, [key]: val } : r)));
+  const addRow = () => setRows((p) => [...p, emptyHolding()]);
+  const delRow = (i) => setRows((p) => p.filter((_, j) => j !== i));
+
+  const save = () => {
+    const clean = rows
+      .map((r) => ({ symbol: r.symbol.trim().toUpperCase().replace("KRW=X", "KRW=X"), qty: Number(r.qty), avg: r.avg === "" ? null : Number(r.avg), label: "" }))
+      .filter((r) => r.symbol && r.qty > 0);
+    onSave(clean);
+    onClose();
+  };
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-head">
+          <div className="modal-title">💼 보유종목 편집</div>
+          <button className="modal-close" onClick={onClose}>✕ 닫기</button>
+        </div>
+        <div className="modal-body">
+          <div className="search-hint" style={{ marginTop: 0 }}>
+            종목코드·수량·평단가를 입력하세요. 코드 예: <b>AAPL</b>(애플), <b>005930.KS</b>(삼성전자), <b>035720.KS</b>(카카오).
+            평단가는 비워도 되지만, 넣으면 손익까지 계산해요. 미국주는 달러, 한국주는 원 기준.
+            <br />코드를 모르면 ‘＋ 종목 추가/검색’으로 확인하거나, 증권앱 스크린샷을 채팅에 올려 주세요 — 제가 채워드립니다.
+          </div>
+          <div className="pf-edit-row pf-edit-head">
+            <span>종목코드</span><span>수량(주)</span><span>평단가</span><span></span>
+          </div>
+          {rows.map((r, i) => (
+            <div className="pf-edit-row" key={i}>
+              <input className="pf-input" placeholder="AAPL / 005930.KS" value={r.symbol} onChange={(e) => update(i, "symbol", e.target.value)} />
+              <input className="pf-input" placeholder="10" inputMode="decimal" value={r.qty} onChange={(e) => update(i, "qty", e.target.value)} />
+              <input className="pf-input" placeholder="평단(선택)" inputMode="decimal" value={r.avg} onChange={(e) => update(i, "avg", e.target.value)} />
+              <button className="pf-row-del" onClick={() => delRow(i)} title="행 삭제">✕</button>
+            </div>
+          ))}
+          <button className="pf-add-row" onClick={addRow}>＋ 행 추가</button>
+          <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+            <button className="add-btn" style={{ flex: 1, padding: "9px" }} onClick={save}>저장</button>
+            <button className="modal-close" style={{ flex: 1 }} onClick={onClose}>취소</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ---------- 페이지 ---------- */
 export default function Page() {
   const [watch, setWatch] = useState(null);
@@ -609,6 +730,8 @@ export default function Page() {
   const [selected, setSelected] = useState(null);
   const [showSearch, setShowSearch] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
+  const [showPf, setShowPf] = useState(false);
+  const [portfolio, setPortfolio] = useState(null);
   const [movers, setMovers] = useState(null);
   const [tip, setTip] = useState(null); // {text,x,y}
   const timerRef = useRef(null);
@@ -633,11 +756,25 @@ export default function Page() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(watch)); } catch {}
   }, [watch]);
 
+  // 포트폴리오 로드/저장
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(PF_KEY);
+      const arr = raw ? JSON.parse(raw) : [];
+      setPortfolio(Array.isArray(arr) ? arr : []);
+    } catch { setPortfolio([]); }
+  }, []);
+  useEffect(() => {
+    if (portfolio == null) return;
+    try { localStorage.setItem(PF_KEY, JSON.stringify(portfolio)); } catch {}
+  }, [portfolio]);
+
   const allSymbols = useMemo(() => {
     const fixed = FIXED.map((f) => f.symbol);
     const w = (watch || []).map((s) => s.symbol);
-    return [...fixed, ...w];
-  }, [watch]);
+    const p = (portfolio || []).map((s) => s.symbol);
+    return [...new Set([...fixed, ...w, ...p])];
+  }, [watch, portfolio]);
 
   const load = useCallback(async () => {
     if (allSymbols.length === 0) return;
@@ -695,6 +832,8 @@ export default function Page() {
     );
   }, []);
 
+  const savePortfolio = useCallback((list) => setPortfolio(list), []);
+
   const favFirst = (list) =>
     [...list].sort((a, b) => (b.fav ? 1 : 0) - (a.fav ? 1 : 0));
 
@@ -714,6 +853,12 @@ export default function Page() {
   const fxCls = fxOk ? trendClass(fxQuote.change) : "flat";
   const usWatch = favFirst((watch || []).filter((s) => !isKorean(s.symbol)));
   const krWatch = favFirst((watch || []).filter((s) => isKorean(s.symbol)));
+
+  const usdkrw = fxOk ? fxQuote.price : null;
+  const pf = (portfolio && portfolio.length)
+    ? computePortfolio(portfolio, quotes, usdkrw)
+    : null;
+  const pfTrend = (v) => (v == null ? "flat" : v > 0 ? "up" : v < 0 ? "down" : "flat");
 
   return (
     <div className="wrap">
@@ -826,6 +971,102 @@ export default function Page() {
         )}
       </section>
 
+      {/* 보유 포트폴리오 분석 */}
+      <section>
+        <div className="section-row">
+          <div className="section-title">💼 내 보유 포트폴리오</div>
+          <button className="add-btn" onClick={() => setShowPf(true)}>✎ 보유종목 편집</button>
+        </div>
+
+        {(!portfolio || portfolio.length === 0) ? (
+          <div className="pf-empty">
+            보유 중인 종목을 넣으면 <b>평가금액·손익·비중·국가 배분</b>을 실시간으로 분석해 드려요.<br />
+            <button className="add-btn" style={{ marginTop: 10 }} onClick={() => setShowPf(true)}>＋ 보유종목 추가하기</button>
+            <div style={{ marginTop: 10, fontSize: 11.5, color: "var(--dim)" }}>
+              증권앱 스크린샷을 채팅에 올려주시면 제가 대신 채워드릴 수도 있어요. (데이터는 이 브라우저에만 저장)
+            </div>
+          </div>
+        ) : pf ? (
+          <>
+            <div className="pf-summary">
+              <div className="pf-sum-card">
+                <div className="pf-sum-k">총 평가금액 (원화환산)</div>
+                <div className="pf-sum-v">{fmtKRW(pf.totalValueKRW)}</div>
+              </div>
+              <div className="pf-sum-card">
+                <div className="pf-sum-k">총 평가손익{pf.hasCost ? "" : " (평단가 입력 시)"}</div>
+                <div className={`pf-sum-v ${pfTrend(pf.totalPLKRW)}-text`}>{pf.hasCost ? fmtKRWsigned(pf.totalPLKRW) : "—"}</div>
+                {pf.hasCost && pf.totalPLpct != null && (
+                  <div className={`pf-sum-sub ${pfTrend(pf.totalPLpct)}-text`}>{fmtPct(pf.totalPLpct)}</div>
+                )}
+              </div>
+              <div className="pf-sum-card">
+                <div className="pf-sum-k">오늘 평가손익</div>
+                <div className={`pf-sum-v ${pfTrend(pf.todayKRW)}-text`}>{fmtKRWsigned(pf.todayKRW)}</div>
+              </div>
+            </div>
+
+            {pf.totalValueKRW > 0 && (
+              <div className="pf-alloc">
+                <div className="pf-alloc-bar">
+                  <div className="pf-alloc-us" style={{ width: `${(pf.valUS / pf.totalValueKRW) * 100}%` }} />
+                  <div className="pf-alloc-kr" style={{ width: `${(pf.valKR / pf.totalValueKRW) * 100}%` }} />
+                </div>
+                <div className="pf-alloc-legend">
+                  <span>🇺🇸 미국 {((pf.valUS / pf.totalValueKRW) * 100).toFixed(0)}% ({fmtKRW(pf.valUS)})</span>
+                  <span>🇰🇷 한국 {((pf.valKR / pf.totalValueKRW) * 100).toFixed(0)}% ({fmtKRW(pf.valKR)})</span>
+                </div>
+              </div>
+            )}
+
+            {pf.warn && <div className="pf-warn">⚠ {pf.warn}</div>}
+
+            <div className="pf-board">
+              {pf.rows.map((r) => (
+                <div
+                  key={r.symbol}
+                  className={`pf-card ${r.ok ? pfTrend(r.plPct != null ? r.plPct : r.change) : "nodata"}`}
+                  onClick={() => r.ok && setSelected({ symbol: r.symbol, label: r.name })}
+                >
+                  <div className="pf-top">
+                    <span className="pf-name">{r.name}</span>
+                    <span className="pf-weight">{r.weight != null ? `비중 ${r.weight.toFixed(1)}%` : ""}</span>
+                  </div>
+                  {!r.ok ? (
+                    <div className="nodata-text">데이터 없음</div>
+                  ) : (
+                    <>
+                      <div className="pf-value">
+                        {r.isUSD ? `$${fmtPrice(r.value, "USD")}` : fmtKRW(r.value)}
+                        {r.isUSD && r.valueKRW != null && <span className="pf-krw"> ≈ {fmtKRW(r.valueKRW)}</span>}
+                      </div>
+                      <div className="pf-pl">
+                        {r.plNative != null ? (
+                          <>
+                            <span className={`${pfTrend(r.plPct)}-text`}>
+                              {r.isUSD ? `${r.plNative > 0 ? "+" : ""}$${fmtPrice(Math.abs(r.plNative), "USD").replace("-", "")}` : fmtKRWsigned(r.plNative)}
+                            </span>
+                            <span className={`${pfTrend(r.plPct)}-text`}>{fmtPct(r.plPct)}</span>
+                          </>
+                        ) : (
+                          <span style={{ color: "var(--dim)" }}>평단가 입력 시 손익 표시</span>
+                        )}
+                      </div>
+                      <div className="pf-detail">
+                        {r.qty.toLocaleString("ko-KR")}주 · 평단 {r.avg != null ? fmtPrice(r.avg, r.cur) : "—"} · 현재 {fmtPrice(r.price, r.cur)}
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="disclaimer">
+              ⚠ 입력하신 보유 정보와 실시간 시세로 계산한 참고용 분석이며, 매매 추천이 아닙니다. 환율·시세 지연으로 실제와 차이가 있을 수 있어요.
+            </div>
+          </>
+        ) : null}
+      </section>
+
       {/* 중립 데이터: 오늘 미국 거래량 상위 (추천 아님) */}
       {movers && movers.length > 0 && (
         <section>
@@ -868,6 +1109,7 @@ export default function Page() {
       {selected && <DetailModal item={selected} onClose={() => setSelected(null)} />}
       {showSearch && <SearchModal onClose={() => setShowSearch(false)} onAdd={addItem} existing={existingSymbols} />}
       {showGuide && <GuideModal onClose={() => setShowGuide(false)} />}
+      {showPf && <PortfolioModal holdings={portfolio || []} onSave={savePortfolio} onClose={() => setShowPf(false)} />}
 
       {tip && (
         <div className="hover-tip" style={{ left: tip.x + 14, top: tip.y + 16 }}>{tip.text}</div>
