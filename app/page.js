@@ -180,12 +180,86 @@ function useEscClose(onClose) {
   }, [onClose]);
 }
 
+const RANGE_LABEL = { "1d": "1일", "5d": "5일", "1mo": "1개월", "6mo": "6개월", "1y": "1년" };
+
+function fmtVol(v) {
+  if (v == null) return "—";
+  if (v >= 1e8) return (v / 1e8).toFixed(1) + "억 주";
+  if (v >= 1e4) return Math.round(v / 1e4).toLocaleString("ko-KR") + "만 주";
+  return v.toLocaleString("ko-KR") + " 주";
+}
+function timeAgo(ms) {
+  if (!ms) return "";
+  const diff = Date.now() - ms;
+  const h = Math.floor(diff / 3600000);
+  if (h < 1) return "방금";
+  if (h < 24) return `${h}시간 전`;
+  return `${Math.floor(h / 24)}일 전`;
+}
+// 실제 데이터로만 만든 사실 요약(원인을 지어내지 않음). "왜"는 아래 실제 뉴스로 안내.
+function summarize(data) {
+  const s = data.series;
+  if (!s || s.length < 2) return null;
+  const first = s[0].c, last = s[s.length - 1].c;
+  if (!first) return null;
+  const pct = ((last - first) / first) * 100;
+  const dir = pct > 0.05 ? "올랐어요" : pct < -0.05 ? "내렸어요" : "거의 변동이 없었어요";
+  const label = RANGE_LABEL[data.range] || "이 구간";
+  let txt = `지금 보는 ${label} 동안 ${pct > 0 ? "+" : ""}${pct.toFixed(2)}% ${dir}.`;
+  const st = data.stats;
+  if (st && st.week52Low != null && st.week52High != null && st.price != null && st.week52High > st.week52Low) {
+    const pos = ((st.price - st.week52Low) / (st.week52High - st.week52Low)) * 100;
+    txt += ` 현재가는 최근 1년 범위에서 ${pos.toFixed(0)}% 지점이에요 (0% = 1년 최저가, 100% = 1년 최고가).`;
+  }
+  return txt;
+}
+
+function Week52Bar({ stats, currency }) {
+  if (!stats) return null;
+  const { week52Low: lo, week52High: hi, price } = stats;
+  if (lo == null || hi == null || price == null || hi <= lo) return null;
+  const pos = Math.max(0, Math.min(100, ((price - lo) / (hi - lo)) * 100));
+  return (
+    <div className="w52">
+      <div className="w52-head">
+        <span title="최근 1년간 가장 낮았던 가격">52주 최저 {fmtPrice(lo, currency)}</span>
+        <span title="최근 1년간 가장 높았던 가격">52주 최고 {fmtPrice(hi, currency)}</span>
+      </div>
+      <div className="w52-track">
+        <div className="w52-fill" style={{ width: `${pos}%` }} />
+        <div className="w52-marker" style={{ left: `${pos}%` }} title="현재가 위치" />
+      </div>
+    </div>
+  );
+}
+
+function StatGrid({ stats, currency }) {
+  if (!stats) return null;
+  const items = [
+    { k: "일중 최고", v: fmtPrice(stats.dayHigh, currency), tip: "오늘 장중 가장 높았던 가격" },
+    { k: "일중 최저", v: fmtPrice(stats.dayLow, currency), tip: "오늘 장중 가장 낮았던 가격" },
+    { k: "거래량", v: fmtVol(stats.volume), tip: "오늘 사고팔린 주식 수. 많을수록 시장 관심이 큽니다" },
+  ];
+  return (
+    <div className="stat-grid">
+      {items.map((it) => (
+        <div className="stat-item" key={it.k} title={it.tip}>
+          <span className="stat-k">{it.k} <span className="info-i">ⓘ</span></span>
+          <span className="stat-v">{it.v}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function DetailModal({ item, onClose }) {
   const [range, setRange] = useState("1mo");
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
+  const [news, setNews] = useState(null);
   useEscClose(onClose);
+  const kr = isKorean(item.symbol);
 
   useEffect(() => {
     let alive = true;
@@ -202,6 +276,18 @@ function DetailModal({ item, onClose }) {
       .finally(() => alive && setLoading(false));
     return () => { alive = false; };
   }, [item.symbol, range]);
+
+  useEffect(() => {
+    let alive = true;
+    setNews(null);
+    fetch(`/api/news?symbol=${encodeURIComponent(item.symbol)}`)
+      .then((r) => r.json())
+      .then((j) => { if (alive) setNews(j); })
+      .catch(() => { if (alive) setNews({ ok: false, supported: !kr, news: [] }); });
+    return () => { alive = false; };
+  }, [item.symbol, kr]);
+
+  const summary = data && !err ? summarize(data) : null;
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -227,12 +313,49 @@ function DetailModal({ item, onClose }) {
           {!loading && err && <div className="loading-text">데이터 없음 ({err})</div>}
           {!loading && !err && data && (
             <>
+              {summary && (
+                <div className="summary-box">
+                  <span className="summary-tag">📊 현황 요약</span>
+                  <span>{summary}</span>
+                </div>
+              )}
               <DetailChart series={data.series} prevClose={data.prevClose} currency={data.currency} />
-              <div style={{ color: "var(--dim)", fontSize: 11, marginTop: 10 }}>
+              <div style={{ color: "var(--dim)", fontSize: 11, marginTop: 8 }}>
                 점선 = 전일 종가 · 그래프 위에 마우스를 올리면 시점별 가격이 표시됩니다.
               </div>
+              <Week52Bar stats={data.stats} currency={data.currency} />
+              <StatGrid stats={data.stats} currency={data.currency} />
             </>
           )}
+
+          {/* 왜 움직였나 — 실제 뉴스로 안내 (지어내지 않음) */}
+          <div className="news-head">📰 최근 뉴스 {kr ? "" : <span className="news-src">· 영문 · 출처 Yahoo Finance</span>}</div>
+          {kr ? (
+            <div className="news-note">
+              한국 종목은 이 무료 데이터로 신뢰할 만한 관련 뉴스를 제공하기 어려워, 위 가격·지표로 흐름을 참고해 주세요.
+              (정확한 뉴스는 네이버 증권·증권사 앱을 함께 보시는 걸 권합니다.)
+            </div>
+          ) : news == null ? (
+            <div className="loading-text" style={{ padding: 16 }}>뉴스 불러오는 중…</div>
+          ) : !news.news || news.news.length === 0 ? (
+            <div className="news-note">표시할 최근 뉴스가 없습니다.</div>
+          ) : (
+            <>
+              <div className="news-guide">‘왜 움직였는지’는 아래 실제 기사 제목에서 단서를 얻으세요. 제목을 누르면 원문으로 이동합니다.</div>
+              <ul className="news-list">
+                {news.news.map((n, i) => (
+                  <li key={i}>
+                    <a className="news-link" href={n.link} target="_blank" rel="noreferrer">{n.title}</a>
+                    <div className="news-meta">{n.publisher}{n.time ? ` · ${timeAgo(n.time)}` : ""}</div>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+
+          <div className="disclaimer">
+            ⚠ 본 화면은 공개 데이터의 시세·뉴스를 단순 제공할 뿐, 투자 권유나 매매 추천이 아닙니다. 투자 판단과 책임은 본인에게 있습니다.
+          </div>
         </div>
       </div>
     </div>

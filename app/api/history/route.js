@@ -63,6 +63,15 @@ export async function GET(request) {
             typeof meta?.chartPreviousClose === "number"
               ? meta.chartPreviousClose
               : null,
+          // 주린이용 실제 지표 (chart meta에 항상 포함됨, 추가 호출 없음)
+          stats: {
+            price: typeof meta?.regularMarketPrice === "number" ? meta.regularMarketPrice : null,
+            dayHigh: typeof meta?.regularMarketDayHigh === "number" ? meta.regularMarketDayHigh : null,
+            dayLow: typeof meta?.regularMarketDayLow === "number" ? meta.regularMarketDayLow : null,
+            week52High: typeof meta?.fiftyTwoWeekHigh === "number" ? meta.fiftyTwoWeekHigh : null,
+            week52Low: typeof meta?.fiftyTwoWeekLow === "number" ? meta.fiftyTwoWeekLow : null,
+            volume: typeof meta?.regularMarketVolume === "number" ? meta.regularMarketVolume : null,
+          },
           series,
           fetchedAt: Date.now(),
         },
