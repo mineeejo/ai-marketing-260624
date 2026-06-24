@@ -9,6 +9,8 @@ import {
   US_PRESET,
   DESCRIPTIONS,
   TAGLINES,
+  GLOSSARY,
+  TIPS,
 } from "./lib/symbols";
 
 const REFRESH_MS = 30000;
@@ -196,22 +198,34 @@ function timeAgo(ms) {
   if (h < 24) return `${h}시간 전`;
   return `${Math.floor(h / 24)}일 전`;
 }
-// 실제 데이터로만 만든 사실 요약(원인을 지어내지 않음). "왜"는 아래 실제 뉴스로 안내.
+// 실제 가격 데이터로만 만든 2~3문장 동향 요약 (원인을 지어내지 않음).
 function summarize(data) {
   const s = data.series;
-  if (!s || s.length < 2) return null;
-  const first = s[0].c, last = s[s.length - 1].c;
-  if (!first) return null;
-  const pct = ((last - first) / first) * 100;
-  const dir = pct > 0.05 ? "올랐어요" : pct < -0.05 ? "내렸어요" : "거의 변동이 없었어요";
-  const label = RANGE_LABEL[data.range] || "이 구간";
-  let txt = `지금 보는 ${label} 동안 ${pct > 0 ? "+" : ""}${pct.toFixed(2)}% ${dir}.`;
   const st = data.stats;
+  if (!s || s.length < 2) return null;
+  const parts = [];
+
+  // 1) 오늘 (전일 종가 대비)
+  if (st && st.price != null && data.prevClose != null && data.prevClose !== 0) {
+    const t = ((st.price - data.prevClose) / data.prevClose) * 100;
+    const w = t > 0.05 ? `+${t.toFixed(2)}% 올라` : t < -0.05 ? `${t.toFixed(2)}% 내려` : "거의 변동 없이";
+    parts.push(`오늘은 전일 대비 ${w} 거래되고 있어요.`);
+  }
+  // 2) 선택한 기간 추세
+  const first = s[0].c, last = s[s.length - 1].c;
+  if (first) {
+    const p = ((last - first) / first) * 100;
+    const label = RANGE_LABEL[data.range] || "최근";
+    const w = p > 0.05 ? `+${p.toFixed(2)}% 상승` : p < -0.05 ? `${p.toFixed(2)}% 하락` : "보합";
+    parts.push(`${label} 기준으로는 ${w} 흐름이에요.`);
+  }
+  // 3) 52주(1년) 위치
   if (st && st.week52Low != null && st.week52High != null && st.price != null && st.week52High > st.week52Low) {
     const pos = ((st.price - st.week52Low) / (st.week52High - st.week52Low)) * 100;
-    txt += ` 현재가는 최근 1년 범위에서 ${pos.toFixed(0)}% 지점이에요 (0% = 1년 최저가, 100% = 1년 최고가).`;
+    const zone = pos < 33 ? "1년 범위에서 낮은 편(바닥권)" : pos > 66 ? "1년 범위에서 높은 편(고점권)" : "1년 범위의 중간쯤";
+    parts.push(`현재가는 ${zone}이에요 (1년 범위의 ${pos.toFixed(0)}% 지점).`);
   }
-  return txt;
+  return parts.length ? parts.join(" ") : null;
 }
 
 function Week52Bar({ stats, currency }) {
@@ -219,6 +233,7 @@ function Week52Bar({ stats, currency }) {
   const { week52Low: lo, week52High: hi, price } = stats;
   if (lo == null || hi == null || price == null || hi <= lo) return null;
   const pos = Math.max(0, Math.min(100, ((price - lo) / (hi - lo)) * 100));
+  const zone = pos < 33 ? "1년 기준 싼 편(바닥권)" : pos > 66 ? "1년 기준 비싼 편(고점권)" : "1년 기준 중간쯤";
   return (
     <div className="w52">
       <div className="w52-head">
@@ -228,6 +243,14 @@ function Week52Bar({ stats, currency }) {
       <div className="w52-track">
         <div className="w52-fill" style={{ width: `${pos}%` }} />
         <div className="w52-marker" style={{ left: `${pos}%` }} title="현재가 위치" />
+      </div>
+      <div className="w52-ends">
+        <span>← 1년 최저(싼 편)</span>
+        <span>1년 최고(비싼 편) →</span>
+      </div>
+      <div className="w52-cap">
+        지난 1년 가격 범위에서 <b style={{ color: "var(--accent)" }}>지금 가격이 어디쯤인지</b> 보여줘요.
+        현재가 <b>{fmtPrice(price, currency)}</b> = 범위의 <b>{pos.toFixed(0)}%</b> 지점 ({zone}).
       </div>
     </div>
   );
@@ -328,33 +351,30 @@ function DetailModal({ item, onClose }) {
             </>
           )}
 
-          {/* 왜 움직였나 — 실제 뉴스로 안내 (지어내지 않음) */}
-          <div className="news-head">📰 최근 뉴스 {kr ? "" : <span className="news-src">· 영문 · 출처 Yahoo Finance</span>}</div>
-          {kr ? (
-            <div className="news-note">
-              한국 종목은 이 무료 데이터로 신뢰할 만한 관련 뉴스를 제공하기 어려워, 위 가격·지표로 흐름을 참고해 주세요.
-              (정확한 뉴스는 네이버 증권·증권사 앱을 함께 보시는 걸 권합니다.)
+          {/* 위 '현황 요약'은 실제 가격 데이터 기반. 기사 원문은 아이콘 링크로만 제공(미국 종목) */}
+          {!kr && news && news.news && news.news.length > 0 && (
+            <div className="news-mini">
+              <span className="news-mini-label">📰 관련 기사(영문·Yahoo):</span>
+              {news.news.slice(0, 5).map((n, i) => (
+                <a
+                  key={i}
+                  className="news-ico"
+                  href={n.link}
+                  target="_blank"
+                  rel="noreferrer"
+                  title={`${n.title}${n.publisher ? ` · ${n.publisher}` : ""}${n.time ? ` · ${timeAgo(n.time)}` : ""}`}
+                >🔗</a>
+              ))}
             </div>
-          ) : news == null ? (
-            <div className="loading-text" style={{ padding: 16 }}>뉴스 불러오는 중…</div>
-          ) : !news.news || news.news.length === 0 ? (
-            <div className="news-note">표시할 최근 뉴스가 없습니다.</div>
-          ) : (
-            <>
-              <div className="news-guide">‘왜 움직였는지’는 아래 실제 기사 제목에서 단서를 얻으세요. 제목을 누르면 원문으로 이동합니다.</div>
-              <ul className="news-list">
-                {news.news.map((n, i) => (
-                  <li key={i}>
-                    <a className="news-link" href={n.link} target="_blank" rel="noreferrer">{n.title}</a>
-                    <div className="news-meta">{n.publisher}{n.time ? ` · ${timeAgo(n.time)}` : ""}</div>
-                  </li>
-                ))}
-              </ul>
-            </>
+          )}
+          {kr && (
+            <div className="news-mini">
+              <span className="news-mini-label">📰 한국 종목 뉴스는 무료 소스 신뢰도가 낮아 생략 — 위 동향 요약을 참고하세요.</span>
+            </div>
           )}
 
           <div className="disclaimer">
-            ⚠ 본 화면은 공개 데이터의 시세·뉴스를 단순 제공할 뿐, 투자 권유나 매매 추천이 아닙니다. 투자 판단과 책임은 본인에게 있습니다.
+            ⚠ ‘현황 요약’은 실제 가격 데이터로 계산한 사실이며, 매매 추천이 아닙니다. 투자 판단과 책임은 본인에게 있습니다.
           </div>
         </div>
       </div>
@@ -538,6 +558,48 @@ function Tagline() {
   return <div className={`tagline ${fade ? "fade" : ""}`}>{TAGLINES[idx]}</div>;
 }
 
+/* ---------- 가이드: 용어사전 + 초보 꿀팁 ---------- */
+function GuideModal({ onClose }) {
+  const [tab, setTab] = useState("tips");
+  useEscClose(onClose);
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-head">
+          <div className="modal-title">📖 주린이 가이드</div>
+          <button className="modal-close" onClick={onClose}>✕ 닫기</button>
+        </div>
+        <div className="modal-body">
+          <div className="guide-tabs">
+            <button className={`range-tab ${tab === "tips" ? "active" : ""}`} onClick={() => setTab("tips")}>초보 꿀팁</button>
+            <button className={`range-tab ${tab === "glossary" ? "active" : ""}`} onClick={() => setTab("glossary")}>용어사전</button>
+          </div>
+          {tab === "tips" ? (
+            <div>
+              {TIPS.map((t) => (
+                <div className="tip-card" key={t.title}>
+                  <div className="tip-title">💡 {t.title}</div>
+                  <div className="tip-body">{t.body}</div>
+                </div>
+              ))}
+              <div className="disclaimer">⚠ 일반적인 투자 원칙 안내이며, 특정 종목 매수 추천이 아닙니다.</div>
+            </div>
+          ) : (
+            <div>
+              {GLOSSARY.map((g) => (
+                <div className="gl-item" key={g.term}>
+                  <div className="gl-term">{g.term}</div>
+                  <div className="gl-desc">{g.desc}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ---------- 페이지 ---------- */
 export default function Page() {
   const [watch, setWatch] = useState(null);
@@ -546,6 +608,8 @@ export default function Page() {
   const [status, setStatus] = useState("loading");
   const [selected, setSelected] = useState(null);
   const [showSearch, setShowSearch] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
+  const [movers, setMovers] = useState(null);
   const [tip, setTip] = useState(null); // {text,x,y}
   const timerRef = useRef(null);
 
@@ -598,6 +662,19 @@ export default function Page() {
     timerRef.current = setInterval(load, REFRESH_MS);
     return () => clearInterval(timerRef.current);
   }, [load, watch]);
+
+  // 거래량 상위(중립 데이터) — 1분마다 갱신
+  useEffect(() => {
+    let alive = true;
+    const fetchMovers = () =>
+      fetch("/api/movers", { cache: "no-store" })
+        .then((r) => r.json())
+        .then((j) => { if (alive && j.ok) setMovers(j.movers); })
+        .catch(() => {});
+    fetchMovers();
+    const id = setInterval(fetchMovers, 60000);
+    return () => { alive = false; clearInterval(id); };
+  }, []);
 
   const addItem = useCallback((item) => {
     setWatch((prev) => {
@@ -671,6 +748,7 @@ export default function Page() {
           <div className="status">
             <span><span className={`dot ${status}`} />{statusText}</span>
             <span>갱신 {fmtTime(fetchedAt)}</span>
+            <button className="guide-btn" onClick={() => setShowGuide(true)}>📖 가이드</button>
             <button className="refresh-btn" onClick={load} disabled={status === "loading"}>↻ 새로고침</button>
           </div>
         </div>
@@ -748,15 +826,48 @@ export default function Page() {
         )}
       </section>
 
+      {/* 중립 데이터: 오늘 미국 거래량 상위 (추천 아님) */}
+      {movers && movers.length > 0 && (
+        <section>
+          <div className="section-title">🔥 오늘 미국 거래량 상위</div>
+          <div className="neutral-note">
+            ‘많이 거래된 종목’이라는 사실 정보일 뿐, 매수 추천이 아니에요. 종목을 둘러볼 때 참고용으로만 보세요. (클릭 → 차트·요약)
+          </div>
+          <div className="movers-board">
+            {movers.map((m) => {
+              const cls = m.changePct == null ? "flat" : m.changePct > 0 ? "up" : m.changePct < 0 ? "down" : "flat";
+              return (
+                <div
+                  key={m.symbol}
+                  className="mover"
+                  onClick={() => setSelected({ symbol: m.symbol, label: m.name })}
+                  title={`${m.name} · 차트 보기`}
+                >
+                  <div className="mover-l">
+                    <span className="mover-sym">{m.symbol}</span>
+                    <span className="mover-name">{m.name}</span>
+                  </div>
+                  <div className="mover-r">
+                    <div>{fmtPrice(m.price, m.currency)}</div>
+                    <div className={`${cls}-text`}>{fmtPct(m.changePct)}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       <div className="foot">
         데이터: Yahoo Finance 공개 엔드포인트 (무료 · API 키 없음) · 미국/한국 주식·지수, 원·달러(KRW=X).
         <br />
-        30초마다 자동 갱신 · 상승=빨강, 하락=파랑 · 카드에 마우스를 올리면 한 줄 설명이 떠요 ·
-        카드를 클릭하면 가격 추이 차트(마우스 올리면 시점별 가격) · 관심 종목은 이 브라우저에 저장됩니다.
+        30초마다 자동 갱신 · 상승=빨강, 하락=파랑 · 카드를 클릭하면 가격 추이 차트와 동향 요약 ·
+        관심 종목·즐겨찾기는 이 브라우저에 저장 · 📖 가이드에서 용어와 초보 꿀팁을 볼 수 있어요.
       </div>
 
       {selected && <DetailModal item={selected} onClose={() => setSelected(null)} />}
       {showSearch && <SearchModal onClose={() => setShowSearch(false)} onAdd={addItem} existing={existingSymbols} />}
+      {showGuide && <GuideModal onClose={() => setShowGuide(false)} />}
 
       {tip && (
         <div className="hover-tip" style={{ left: tip.x + 14, top: tip.y + 16 }}>{tip.text}</div>
