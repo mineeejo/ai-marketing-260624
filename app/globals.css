@@ -397,6 +397,28 @@ a {
   border-radius: 10px;
   border: 1px solid var(--border);
 }
+.review-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+}
+.link-btn:hover {
+  color: var(--accent);
+}
+.link-btn.danger:hover {
+  color: #d23b3b;
+}
 .empty {
   text-align: center;
   color: var(--muted);
