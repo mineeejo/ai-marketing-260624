@@ -15,7 +15,9 @@ export default function ToursPage() {
       <div className="tour-grid">
         {tours.map((t) => (
           <Link key={t.id} href={`/tours/${t.id}`} className="tour-card">
-            <div className="thumb">{t.emoji}</div>
+            <div className="thumb">
+              {t.image ? <img src={t.image} alt={t.title} /> : t.emoji}
+            </div>
             <div className="body">
               <span className="badge">{t.badge}</span>
               <h3>{t.title}</h3>

@@ -5,6 +5,8 @@ export const tours = [
   {
     id: "day",
     emoji: "🌄",
+    image:
+      "https://d8j0ntlcm91z4.cloudfront.net/user_3CkUAX5vl7hsRPpzsmLNJVSyYqp/hf_20260626_053223_23dff708-92fa-4a83-a907-239321237c24.png",
     badge: "당일",
     title: "그랜드캐년 당일투어",
     region: "라스베가스 출발",
@@ -56,6 +58,8 @@ export const tours = [
   {
     id: "2d1n",
     emoji: "🏜️",
+    image:
+      "https://d8j0ntlcm91z4.cloudfront.net/user_3CkUAX5vl7hsRPpzsmLNJVSyYqp/hf_20260626_053224_8317b01e-5154-4690-ab86-e2be5faf70d9.png",
     badge: "1박 2일",
     title: "6대 캐년 투어 (1박 2일)",
     region: "라스베가스 출발",
@@ -114,6 +118,8 @@ export const tours = [
   {
     id: "3d2n",
     emoji: "🌌",
+    image:
+      "https://d8j0ntlcm91z4.cloudfront.net/user_3CkUAX5vl7hsRPpzsmLNJVSyYqp/hf_20260626_053225_56129b17-1a95-45a9-b240-8b091b84e1a3.png",
     badge: "2박 3일",
     title: "7대 캐년 투어 (2박 3일)",
     region: "라스베가스 출발",

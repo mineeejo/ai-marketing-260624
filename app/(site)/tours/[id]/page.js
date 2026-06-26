@@ -21,7 +21,13 @@ export default function TourDetailPage({ params }) {
 
   return (
     <article>
-      <div className="detail-hero">{tour.emoji}</div>
+      <div className="detail-hero">
+        {tour.image ? (
+          <img src={tour.image} alt={tour.title} />
+        ) : (
+          tour.emoji
+        )}
+      </div>
 
       <span className="badge">{tour.badge}</span>
       <h1 className="detail-title">{tour.title}</h1>

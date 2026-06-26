@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Twitter, Circle, Instagram, Linkedin } from "lucide-react";
+import { tours, formatPrice } from "./lib/tours";
 
 // 배경 영상 (Higgsfield로 생성한 그랜드캐년 골든아워 항공 영상)
 const VIDEO_URL =
@@ -18,6 +19,25 @@ const SERVICES = [
   "Horseshoe Bend",
   "Zion Canyon",
   "Other",
+];
+
+// "왜 조이감성투어" 3가지 이유
+const WHY = [
+  {
+    icon: "🚐",
+    title: "편안한 감성 여행",
+    desc: "쾌적하고 안락한 최신 차량으로 이동. 장시간 이동도 창밖 풍경을 즐기며 힐링하는 시간으로 채워드려요.",
+  },
+  {
+    icon: "🎙️",
+    title: "베테랑 가이드의 스토리텔링",
+    desc: "단순한 설명이 아니라 그랜드캐년에 얽힌 역사와 숨은 이야기까지. 마치 한 편의 영화처럼 빠져들게 됩니다.",
+  },
+  {
+    icon: "📸",
+    title: "알찬 코스 · 인생샷 명당",
+    desc: "오랜 경험과 노하우로 핵심만 콕콕. 현지 가이드만 아는 '인생샷 명당'까지 꼼꼼하게 안내해드려요.",
+  },
 ];
 
 function SocialBtn({ icon: Icon, className }) {
@@ -57,7 +77,8 @@ export default function LandingPage() {
     "flex-1 min-w-0 text-sm px-3 py-2.5 rounded-xl border border-gray-200 bg-transparent placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition";
 
   return (
-    <div className="min-h-screen bg-white p-3 sm:p-4 md:p-6">
+    <div className="bg-white">
+      <div className="p-3 sm:p-4 md:p-6">
       <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden bg-stone-800 min-h-[calc(100vh-24px)] sm:min-h-[calc(100vh-32px)] md:min-h-[calc(100vh-48px)] lg:h-[calc(100vh-48px)]">
         {/* Background video */}
         <video
@@ -246,6 +267,120 @@ export default function LandingPage() {
           </div>
         </div>
       </div>
+      </div>
+
+      {/* ===== 투어 상품 섹션 ===== */}
+      <section id="tours" className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
+        <div className="text-center mb-10">
+          <p className="text-sm font-semibold text-emerald-700 tracking-widest">
+            JOY GAMSUNG TOUR
+          </p>
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mt-2">
+            그랜드캐년 투어 상품
+          </h2>
+          <p className="text-gray-500 mt-3">라스베가스 출발 · 당일부터 2박 3일까지</p>
+        </div>
+
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {tours.map((t) => (
+            <Link
+              key={t.id}
+              href={`/tours/${t.id}`}
+              className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-shadow overflow-hidden flex flex-col"
+            >
+              <div className="h-48 bg-emerald-50 overflow-hidden">
+                {t.image ? (
+                  <img
+                    src={t.image}
+                    alt={t.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-6xl">
+                    {t.emoji}
+                  </div>
+                )}
+              </div>
+              <div className="p-5 flex flex-col flex-1">
+                <span className="self-start text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
+                  {t.badge}
+                </span>
+                <h3 className="text-lg font-bold mt-3">{t.title}</h3>
+                <p className="text-sm text-gray-500 mt-1 flex-1">{t.summary}</p>
+                <div className="mt-4 flex items-center justify-between">
+                  <span className="text-emerald-700 font-extrabold text-lg">
+                    {formatPrice(t.price, t.currency)}
+                  </span>
+                  <span className="text-sm text-gray-400">{t.duration}</span>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        <div className="text-center mt-10">
+          <Link
+            href="/tours"
+            className="inline-block border border-gray-300 rounded-full px-6 py-3 text-sm font-semibold hover:bg-gray-50 transition-colors"
+          >
+            전체 상품 자세히 보기 →
+          </Link>
+        </div>
+      </section>
+
+      {/* ===== 왜 조이감성투어 ===== */}
+      <section className="bg-stone-50 border-y border-gray-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+              왜 조이감성투어일까요?
+            </h2>
+            <p className="text-gray-500 mt-3">
+              편안함, 감동, 그리고 인생샷까지 — 다녀온 분들이 추천하는 이유
+            </p>
+          </div>
+          <div className="grid gap-6 md:grid-cols-3">
+            {WHY.map((w) => (
+              <div
+                key={w.title}
+                className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm"
+              >
+                <div className="text-4xl">{w.icon}</div>
+                <h3 className="text-lg font-bold mt-4">{w.title}</h3>
+                <p className="text-sm text-gray-500 mt-2 leading-relaxed">{w.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== Footer ===== */}
+      <footer className="bg-[#0e1422] text-gray-300">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 flex flex-col sm:flex-row justify-between gap-6">
+          <div>
+            <p className="text-white font-bold text-lg">🏜️ 조이감성투어</p>
+            <p className="text-sm mt-1">라스베가스 출발 그랜드캐년 여행 전문</p>
+          </div>
+          <div className="sm:text-right text-sm space-y-1">
+            <p>
+              💬 카카오톡 ID:{" "}
+              <span className="text-white font-semibold">2050hj</span> (할인·예약 문의)
+            </p>
+            <p>라스베가스 스트립 내 호텔 픽업</p>
+            <div className="flex sm:justify-end gap-4 mt-3">
+              <Link href="/tours" className="hover:text-white transition-colors">
+                투어 상품
+              </Link>
+              <Link href="/reviews" className="hover:text-white transition-colors">
+                여행 후기
+              </Link>
+              <Link href="/contact" className="hover:text-white transition-colors">
+                연락처
+              </Link>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
