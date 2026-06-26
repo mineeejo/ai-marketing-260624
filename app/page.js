@@ -10,14 +10,13 @@ const VIDEO_URL =
 
 // 그랜드캐년 투어 옵션 (문의 폼의 관심 태그)
 const SERVICES = [
-  "Sunrise Tour",
-  "Helicopter Tour",
+  "Day Tour",
+  "2 Days 1 Night",
+  "3 Days 2 Nights",
   "Skywalk",
-  "Rafting",
-  "Hiking",
-  "Sunset Tour",
-  "Photography",
-  "Camping",
+  "Antelope Canyon",
+  "Horseshoe Bend",
+  "Zion Canyon",
   "Other",
 ];
 
