@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { tours, getTour, formatPrice } from "../../lib/tours";
+import { tours, getTour, formatPrice } from "../../../lib/tours";
 
 export function generateStaticParams() {
   return tours.map((t) => ({ id: t.id }));

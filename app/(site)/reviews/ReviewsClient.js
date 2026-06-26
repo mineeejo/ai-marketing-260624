@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { compressImage } from "../lib/compressImage";
+import { compressImage } from "../../lib/compressImage";
 
 const RATING_OPTIONS = [
   { v: "5", label: "★★★★★ 매우 만족" },

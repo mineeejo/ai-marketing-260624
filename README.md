@@ -1,14 +1,23 @@
-# 여행기획 투어 홈페이지
+# 그랜드캐년 투어 홈페이지
 
-Next.js 14 (App Router) 기반 투어 소개 홈페이지입니다.
+Next.js 14 (App Router) 기반 그랜드캐년 투어 홍보 홈페이지입니다.
 
-- **투어 상품 소개** — 메인(`/`) + 상세(`/tours/[id]`). 상품은 `app/lib/tours.js` 에서 관리
+- **메인 랜딩(`/`)** — 그랜드캐년 풀스크린 배경 영상 + 문의 폼 (Tailwind, lucide-react)
+- **투어 상품 소개** — `/tours` 목록 + `/tours/[id]` 상세. 상품은 `app/lib/tours.js` 에서 관리
 - **연락처 안내** — `/contact`
 - **여행 후기 게시판** — `/reviews`. 사용자가 사진과 함께 후기를 직접 작성 (Supabase 저장)
 
 ## 기술 스택
 - Next.js 14 / React 18
+- Tailwind CSS + lucide-react — 메인 랜딩 UI
 - Supabase (Postgres + Storage) — 후기 데이터 & 사진 업로드
+
+## 폴더 구조
+- `app/page.js` — 메인 랜딩(풀스크린, 헤더/푸터 없음)
+- `app/(site)/` — 헤더·푸터 공통 레이아웃을 쓰는 페이지 그룹(투어/연락처/후기)
+- `app/api/reviews/` — 후기 조회·작성·수정·삭제 API
+
+> 메인 배경 영상은 `app/page.js` 상단 `VIDEO_URL` 상수에서 교체할 수 있습니다.
 
 ---
 
