@@ -1,55 +1,52 @@
 export const metadata = {
-  title: "연락처 | 여행기획 투어",
-  description: "전화, 이메일, 카카오톡, 방문 상담 안내입니다. 편하게 문의주세요.",
+  title: "연락처 | 조이감성투어",
+  description: "그랜드캐년 투어 예약·할인 문의는 카카오톡으로. 라스베가스 호텔 픽업 안내.",
 };
 
 export default function ContactPage() {
   return (
     <article>
-      <h1 className="section-title">연락처 안내</h1>
+      <h1 className="section-title">연락처 · 예약 문의</h1>
       <p className="section-sub">
-        궁금한 점이나 예약 문의는 아래 채널로 편하게 연락주세요. 평일 기준 1시간
-        내 답변드립니다.
+        그랜드캐년 투어 예약과 할인 문의는 카카오톡으로 편하게 연락주세요.
       </p>
 
       <div className="contact-grid">
         <div className="contact-card">
-          <div className="ico">📞</div>
-          <h3>전화 문의</h3>
-          <p>02-1234-5678</p>
-          <p>평일 09:00 – 18:00</p>
-        </div>
-        <div className="contact-card">
-          <div className="ico">✉️</div>
-          <h3>이메일</h3>
-          <p>hello@tour.example</p>
-          <p>24시간 접수</p>
-        </div>
-        <div className="contact-card">
           <div className="ico">💬</div>
-          <h3>카카오톡 상담</h3>
-          <p>@여행기획투어</p>
-          <p>실시간 채팅 상담</p>
+          <h3>카카오톡 문의</h3>
+          <p>
+            ID: <strong>2050hj</strong>
+          </p>
+          <p>할인·예약 실시간 상담</p>
         </div>
         <div className="contact-card">
-          <div className="ico">📍</div>
-          <h3>방문 상담</h3>
-          <p>서울특별시 중구 여행로 100</p>
-          <p>여행빌딩 5층</p>
+          <div className="ico">🚐</div>
+          <h3>픽업 안내</h3>
+          <p>라스베가스 스트립 내 호텔</p>
+          <p>예약 시 호텔명·주소 전달</p>
+        </div>
+        <div className="contact-card">
+          <div className="ico">🕔</div>
+          <h3>출발 시각</h3>
+          <p>예약일 새벽(AM) 출발</p>
+          <p>전날 밤~당일 새벽</p>
+        </div>
+        <div className="contact-card">
+          <div className="ico">⭐</div>
+          <h3>여행 후기</h3>
+          <p>네이버 블로그 · 사이트 후기</p>
+          <p>먼저 다녀온 분들의 생생한 리뷰</p>
         </div>
       </div>
 
-      <h2 style={{ marginTop: 40, fontSize: 20 }}>오시는 길</h2>
-      <iframe
-        className="map-box"
-        title="오시는 길 지도"
-        loading="lazy"
-        referrerPolicy="no-referrer-when-downgrade"
-        src="https://www.openstreetmap.org/export/embed.html?bbox=126.9760%2C37.5630%2C126.9870%2C37.5690&layer=mapnik&marker=37.566%2C126.982"
-      />
-      <p className="section-sub" style={{ marginTop: 12 }}>
-        지하철 2호선 시청역 4번 출구에서 도보 5분 거리입니다.
-      </p>
+      <h2 style={{ marginTop: 40, fontSize: 20 }}>예약 전 꼭 확인하세요</h2>
+      <ul className="notes-list" style={{ marginTop: 12 }}>
+        <li>픽업은 라스베가스 스트립 내 호텔에서만 가능합니다. (호텔명·주소 사전 전달 필요)</li>
+        <li>캐리어는 차량에 실을 수 없어, 픽업 전 호텔 로비에 맡기셔야 합니다.</li>
+        <li>공원·투어지 입장료는 현지 가격 변동 시 변동가가 적용됩니다.</li>
+        <li>예약금 환불: 출발 6일 전 전액 / 5일~72시간 전 50% / 72시간 이내 불가 (천재지변 시 100% 환불).</li>
+      </ul>
     </article>
   );
 }

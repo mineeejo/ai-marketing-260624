@@ -8,7 +8,7 @@ export default function SiteLayout({ children }) {
       <header className="site-header">
         <div className="container header-inner">
           <Link href="/" className="brand">
-            🏜️ 그랜드캐년<span>투어</span>
+            🏜️ 조이감성<span>투어</span>
           </Link>
           <nav className="nav">
             <Link href="/#tours">투어 소개</Link>
@@ -23,14 +23,14 @@ export default function SiteLayout({ children }) {
       <footer className="site-footer">
         <div className="container footer-inner">
           <div>
-            <strong>그랜드캐년 투어</strong>
-            <p>미국 서부 협곡 여행 전문</p>
+            <strong>조이감성투어</strong>
+            <p>라스베가스 출발 그랜드캐년 여행 전문</p>
           </div>
           <div className="footer-meta">
-            <p>📞 02-1234-5678 · ✉️ hello@grandcanyon.tour</p>
-            <p>서울특별시 중구 여행로 100 · 평일 09:00–18:00</p>
+            <p>💬 카카오톡 ID: 2050hj (할인·예약 문의)</p>
+            <p>라스베가스 스트립 내 호텔 픽업</p>
             <p className="copyright">
-              © {new Date().getFullYear()} 그랜드캐년 투어. All rights reserved.
+              © {new Date().getFullYear()} 조이감성투어. All rights reserved.
             </p>
           </div>
         </div>

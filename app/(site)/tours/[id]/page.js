@@ -8,9 +8,9 @@ export function generateStaticParams() {
 
 export function generateMetadata({ params }) {
   const tour = getTour(params.id);
-  if (!tour) return { title: "상품을 찾을 수 없습니다 | 여행기획 투어" };
+  if (!tour) return { title: "상품을 찾을 수 없습니다 | 조이감성투어" };
   return {
-    title: `${tour.title} | 여행기획 투어`,
+    title: `${tour.title} | 조이감성투어`,
     description: tour.summary,
   };
 }
@@ -30,8 +30,13 @@ export default function TourDetailPage({ params }) {
       <div className="detail-meta">
         <span className="chip">📍 {tour.region}</span>
         <span className="chip">🗓️ {tour.duration}</span>
-        <span className="chip">💰 {formatPrice(tour.price)}</span>
+        <span className="chip">💰 {formatPrice(tour.price, tour.currency)}</span>
       </div>
+      {tour.priceNote && (
+        <p className="section-sub" style={{ marginTop: -16 }}>
+          ※ {tour.priceNote}
+        </p>
+      )}
 
       <section className="detail-section">
         <h2>여행 하이라이트</h2>
@@ -53,11 +58,50 @@ export default function TourDetailPage({ params }) {
         </ul>
       </section>
 
+      {(tour.included || tour.notIncluded) && (
+        <section className="detail-section">
+          <h2>포함 / 불포함 사항</h2>
+          <div className="incl-grid">
+            {tour.included && (
+              <div className="incl-box">
+                <h3 className="incl-yes">포함</h3>
+                <ul>
+                  {tour.included.map((x, i) => (
+                    <li key={i}>{x}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {tour.notIncluded && (
+              <div className="incl-box">
+                <h3 className="incl-no">불포함</h3>
+                <ul>
+                  {tour.notIncluded.map((x, i) => (
+                    <li key={i}>{x}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {tour.notes && (
+        <section className="detail-section">
+          <h2>예약 전 확인사항</h2>
+          <ul className="notes-list">
+            {tour.notes.map((n, i) => (
+              <li key={i}>{n}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <div style={{ display: "flex", gap: 12, marginTop: 28 }}>
         <Link href="/contact" className="btn">
           예약·문의하기
         </Link>
-        <Link href="/" className="btn btn-ghost">
+        <Link href="/tours" className="btn btn-ghost">
           다른 상품 보기
         </Link>
       </div>

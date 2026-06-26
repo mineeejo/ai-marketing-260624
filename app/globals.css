@@ -256,6 +256,49 @@ a {
   color: var(--accent-dark);
 }
 
+/* ---------- Included / Notes ---------- */
+.incl-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+.incl-box {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.incl-box h3 {
+  margin: 0 0 10px;
+  font-size: 15px;
+}
+.incl-box .incl-yes {
+  color: var(--accent-dark);
+}
+.incl-box .incl-no {
+  color: #c0563b;
+}
+.incl-box ul,
+.notes-list {
+  margin: 0;
+  padding-left: 18px;
+}
+.incl-box li {
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: var(--text);
+}
+.notes-list {
+  background: var(--accent-soft);
+  border-radius: 12px;
+  padding: 18px 20px 18px 38px;
+}
+.notes-list li {
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
 /* ---------- Buttons ---------- */
 .btn {
   display: inline-block;

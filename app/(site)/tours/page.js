@@ -21,7 +21,8 @@ export default function ToursPage() {
               <h3>{t.title}</h3>
               <p className="desc">{t.summary}</p>
               <div className="price">
-                {formatPrice(t.price)} <small>· {t.duration} · {t.region}</small>
+                {formatPrice(t.price, t.currency)}{" "}
+                <small>· {t.duration} · {t.region}</small>
               </div>
             </div>
           </Link>
