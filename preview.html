@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Grand Canyon Tour — Landing Preview</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+<style>* { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body>
+<!-- 이 파일은 실제 React/Next 랜딩 페이지(app/page.js)와 동일한 구성의 정적 미리보기입니다. -->
+<div class="min-h-screen bg-white p-3 sm:p-4 md:p-6">
+  <div class="relative rounded-2xl sm:rounded-3xl overflow-hidden bg-stone-800 min-h-[calc(100vh-24px)] sm:min-h-[calc(100vh-32px)] md:min-h-[calc(100vh-48px)] lg:h-[calc(100vh-48px)]">
+    <video class="absolute inset-0 w-full h-full object-cover" autoplay muted loop playsinline
+      src="https://d8j0ntlcm91z4.cloudfront.net/user_3CkUAX5vl7hsRPpzsmLNJVSyYqp/hf_20260626_041746_4ec96dc5-b701-4029-9e9f-adc136e500a5.mp4"></video>
+    <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
+
+    <div class="relative z-10 flex flex-col min-h-[calc(100vh-24px)] sm:min-h-[calc(100vh-32px)] md:min-h-[calc(100vh-48px)] lg:h-full p-4 sm:p-6 md:p-8 gap-6">
+      <!-- Navbar -->
+      <div class="bg-white/60 backdrop-blur-md rounded-2xl shadow-sm pl-3 sm:pl-4 pr-2 py-2 w-full sm:w-auto flex items-center gap-3 sm:gap-6">
+        <a href="#" class="flex items-center shrink-0">
+          <svg width="32" height="32" viewBox="0 0 256 256">
+            <path d="M 256 256 L 128 256 L 0 128 L 128 128 Z" fill="#000" />
+            <path d="M 256 128 L 128 128 L 0 0 L 128 0 Z" fill="#000" />
+          </svg>
+        </a>
+        <nav class="hidden sm:flex items-center gap-6">
+          <a class="text-gray-800 text-sm font-medium hover:opacity-60 transition-opacity whitespace-nowrap" href="#">Tours</a>
+          <a class="text-gray-800 text-sm font-medium hover:opacity-60 transition-opacity whitespace-nowrap" href="#">Experiences</a>
+          <a class="text-gray-800 text-sm font-medium hover:opacity-60 transition-opacity whitespace-nowrap" href="#">Reviews</a>
+          <a class="text-gray-800 text-sm font-medium hover:opacity-60 transition-opacity whitespace-nowrap" href="#">Contact</a>
+        </nav>
+        <a href="#" class="ml-auto bg-black text-white text-sm font-medium px-4 sm:px-5 py-2 rounded-xl hover:bg-gray-800 transition-colors whitespace-nowrap">Book a tour</a>
+      </div>
+
+      <div class="flex-1 min-h-[2rem]"></div>
+
+      <!-- Bottom row -->
+      <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+        <p class="text-white text-3xl sm:text-4xl xl:text-5xl font-medium leading-tight drop-shadow-lg lg:max-w-lg xl:max-w-2xl shrink-0">
+          Witness the wonder of the<br>
+          <span style="font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;">Grand Canyon</span>
+        </p>
+
+        <div class="w-full lg:w-[min(480px,45%)] shrink-0">
+          <div class="bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden p-4 sm:p-6 flex flex-col gap-4">
+            <h2 class="text-xl sm:text-2xl font-semibold text-black tracking-tight">Say hello! 👋</h2>
+
+            <div class="flex flex-row items-center justify-between gap-3 bg-gray-50 rounded-2xl px-4 py-2.5">
+              <div class="min-w-0">
+                <p class="text-xs text-gray-500">Drop us a line</p>
+                <a href="mailto:hello@grandcanyon.tour" class="block text-blue-600 font-semibold hover:underline truncate">hello@grandcanyon.tour</a>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <span class="w-8 h-8 rounded-xl flex items-center justify-center bg-gray-100 text-gray-800 text-[13px]">𝕏</span>
+                <span class="w-8 h-8 rounded-xl flex items-center justify-center bg-pink-100 text-pink-500">●</span>
+                <span class="w-8 h-8 rounded-xl flex items-center justify-center bg-orange-100 text-orange-400 text-[13px]">◎</span>
+                <span class="w-8 h-8 rounded-xl flex items-center justify-center bg-blue-100 text-blue-600 text-[13px] font-bold">in</span>
+              </div>
+            </div>
+
+            <div id="formArea">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="flex-1 h-px bg-gray-200"></div>
+                <span class="text-gray-400 font-medium text-sm">OR</span>
+                <div class="flex-1 h-px bg-gray-200"></div>
+              </div>
+
+              <form class="flex flex-col gap-4" onsubmit="return submitForm(event)">
+                <label class="text-sm font-medium text-black">Tell us about your trip</label>
+                <div class="flex flex-col sm:flex-row gap-2">
+                  <input class="flex-1 min-w-0 text-sm px-3 py-2.5 rounded-xl border border-gray-200 bg-transparent placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition" placeholder="Full name" />
+                  <input class="flex-1 min-w-0 text-sm px-3 py-2.5 rounded-xl border border-gray-200 bg-transparent placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition" placeholder="Email" />
+                </div>
+                <textarea rows="4" class="flex-1 min-w-0 text-sm px-3 py-2.5 rounded-xl border border-gray-200 bg-transparent placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition resize-none" placeholder="When are you planning to visit, and how many travelers..."></textarea>
+                <div class="flex flex-col gap-2">
+                  <label class="text-sm font-medium text-black">I'm interested in...</label>
+                  <div id="tags" class="flex flex-wrap gap-1.5"></div>
+                </div>
+                <button type="submit" class="w-full bg-black text-white text-sm font-semibold py-3 rounded-2xl hover:bg-gray-800 transition-colors">Send my message</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SERVICES = ["Sunrise Tour","Helicopter Tour","Skywalk","Rafting","Hiking","Sunset Tour","Photography","Camping","Other"];
+const sel = new Set();
+const tags = document.getElementById('tags');
+SERVICES.forEach(s => {
+  const b = document.createElement('button');
+  b.type = 'button'; b.textContent = s;
+  const base = 'text-xs font-medium px-3 py-2 rounded-lg border transition-all';
+  const off = ' bg-white text-gray-700 border-gray-200 hover:border-gray-400';
+  const on = ' bg-gray-100 text-black border-black';
+  b.className = base + off;
+  b.onclick = () => { if (sel.has(s)) { sel.delete(s); b.className = base + off; } else { sel.add(s); b.className = base + on; } };
+  tags.appendChild(b);
+});
+function submitForm(e){
+  e.preventDefault();
+  const btn = e.target.querySelector('button[type=submit]');
+  btn.textContent = 'Sending...'; btn.disabled = true;
+  setTimeout(() => {
+    document.getElementById('formArea').innerHTML =
+      '<div class="flex flex-col items-center text-center py-6 gap-3">'+
+      '<div class="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center text-xl">✓</div>'+
+      '<h3 class="text-base font-semibold text-gray-900">You\'re all set!</h3>'+
+      '<p class="text-sm text-gray-500">Expect a reply within 24 hours.</p></div>';
+  }, 1000);
+  return false;
+}
+</script>
+</body>
+</html>
