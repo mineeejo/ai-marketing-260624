@@ -11,9 +11,10 @@ export default function SiteLayout({ children }) {
             🏜️ 조이감성<span>투어</span>
           </Link>
           <nav className="nav">
-            <Link href="/#tours">투어 소개</Link>
-            <Link href="/contact">연락처</Link>
+            <Link href="/tours">투어 소개</Link>
+            <Link href="/why">왜 조이감성투어</Link>
             <Link href="/reviews">여행 후기</Link>
+            <Link href="/book">예약·문의</Link>
           </nav>
         </div>
       </header>

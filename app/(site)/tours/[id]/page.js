@@ -104,7 +104,7 @@ export default function TourDetailPage({ params }) {
       )}
 
       <div style={{ display: "flex", gap: 12, marginTop: 28 }}>
-        <Link href="/contact" className="btn">
+        <Link href="/book" className="btn">
           예약·문의하기
         </Link>
         <Link href="/tours" className="btn btn-ghost">
