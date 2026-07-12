@@ -27,15 +27,29 @@ function formatDate(iso) {
   }
 }
 
-// 폼의 image 필드를 압축본으로 교체하고, 비어있으면 제거합니다.
-async function withCompressedImage(formData) {
-  const file = formData.get("image");
-  if (file && typeof file.size === "number" && file.size > 0) {
-    formData.set("image", await compressImage(file));
-  } else {
-    formData.delete("image");
+const MAX_IMAGES = 10;
+
+// 폼의 image 필드(여러 장)를 각각 압축본으로 교체합니다. 최대 MAX_IMAGES 장.
+async function withCompressedImages(formData) {
+  const files = formData
+    .getAll("image")
+    .filter((f) => f && typeof f.size === "number" && f.size > 0);
+  formData.delete("image");
+  for (const f of files.slice(0, MAX_IMAGES)) {
+    formData.append("image", await compressImage(f));
   }
-  return formData;
+  return { formData, count: files.length };
+}
+
+function Gallery({ urls }) {
+  if (!urls || urls.length === 0) return null;
+  return (
+    <div className="photo-grid">
+      {urls.map((u, i) => (
+        <img key={i} className="photo-thumb" src={u} alt="후기 사진" loading="lazy" />
+      ))}
+    </div>
+  );
 }
 
 export default function ReviewsClient() {
@@ -68,7 +82,12 @@ export default function ReviewsClient() {
     setMsg(null);
     setSubmitting(true);
     try {
-      const fd = await withCompressedImage(new FormData(e.currentTarget));
+      const { formData: fd, count } = await withCompressedImages(
+        new FormData(e.currentTarget)
+      );
+      if (count > MAX_IMAGES) {
+        throw new Error(`사진은 최대 ${MAX_IMAGES}장까지 첨부할 수 있습니다.`);
+      }
       const res = await fetch("/api/reviews", { method: "POST", body: fd });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -137,8 +156,8 @@ export default function ReviewsClient() {
         </div>
 
         <div className="field">
-          <label htmlFor="image">사진 첨부 (선택 · 업로드 시 자동 압축)</label>
-          <input id="image" name="image" type="file" accept="image/*" />
+          <label htmlFor="image">사진 첨부 (선택 · 최대 10장 · 업로드 시 자동 압축)</label>
+          <input id="image" name="image" type="file" accept="image/*" multiple />
         </div>
 
         <button className="btn" type="submit" disabled={submitting}>
@@ -176,7 +195,12 @@ function ReviewItem({ review, onUpdated, onDeleted }) {
     setErr(null);
     setBusy(true);
     try {
-      const fd = await withCompressedImage(new FormData(e.currentTarget));
+      const { formData: fd, count } = await withCompressedImages(
+        new FormData(e.currentTarget)
+      );
+      if (count > MAX_IMAGES) {
+        throw new Error(`사진은 최대 ${MAX_IMAGES}장까지 첨부할 수 있습니다.`);
+      }
       const res = await fetch(`/api/reviews/${review.id}`, { method: "PATCH", body: fd });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -237,17 +261,17 @@ function ReviewItem({ review, onUpdated, onDeleted }) {
           <label>후기 내용</label>
           <textarea name="content" maxLength={2000} required defaultValue={review.content} />
         </div>
-        {review.image_url && (
+        {review.image_urls?.length > 0 && (
           <div className="field">
-            <img className="photo" src={review.image_url} alt="현재 사진" />
+            <Gallery urls={review.image_urls} />
             <label style={{ fontWeight: 400, marginTop: 6 }}>
-              <input type="checkbox" name="removeImage" value="true" /> 기존 사진 삭제
+              <input type="checkbox" name="removeImages" value="true" /> 기존 사진 모두 삭제
             </label>
           </div>
         )}
         <div className="field">
-          <label>사진 교체 (선택)</label>
-          <input name="image" type="file" accept="image/*" />
+          <label>사진 추가 (선택 · 최대 10장, 기존 사진에 이어붙임)</label>
+          <input name="image" type="file" accept="image/*" multiple />
         </div>
         <div style={{ display: "flex", gap: 10 }}>
           <button className="btn" type="submit" disabled={busy}>
@@ -277,9 +301,7 @@ function ReviewItem({ review, onUpdated, onDeleted }) {
       </div>
       <Stars n={review.rating} />
       <p className="content">{review.content}</p>
-      {review.image_url && (
-        <img className="photo" src={review.image_url} alt="후기 사진" loading="lazy" />
-      )}
+      <Gallery urls={review.image_urls} />
       {err && <p className="form-msg error" style={{ marginTop: 10 }}>{err}</p>}
       <div className="review-actions">
         <button type="button" className="link-btn" onClick={() => setEditing(true)}>

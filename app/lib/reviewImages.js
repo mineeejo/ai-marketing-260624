@@ -1,7 +1,21 @@
 import { REVIEW_BUCKET } from "./supabase";
 
 export const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10MB (클라이언트에서 압축 후 업로드)
+export const MAX_IMAGES = 10; // 후기 1건당 최대 첨부 장수
 export const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+
+// 여러 이미지 파일을 업로드하고 public URL 배열을 돌려줍니다.
+export async function uploadReviewImages(supabase, images) {
+  const files = (images || []).filter(
+    (f) => f && typeof f.arrayBuffer === "function" && f.size > 0
+  );
+  if (files.length > MAX_IMAGES) {
+    throw new ValidationError(`사진은 최대 ${MAX_IMAGES}장까지 첨부할 수 있습니다.`);
+  }
+  const urls = [];
+  for (const f of files) urls.push(await uploadReviewImage(supabase, f));
+  return urls;
+}
 
 // FormData의 이미지 파일을 검증하고 Storage에 업로드한 뒤 public URL을 돌려줍니다.
 // 이미지가 없으면 null을 반환합니다. 유효성 오류는 throw 합니다.

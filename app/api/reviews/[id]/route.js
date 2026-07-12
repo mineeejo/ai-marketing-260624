@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "../../../lib/supabase";
 import {
-  uploadReviewImage,
+  uploadReviewImages,
   deleteReviewImage,
+  MAX_IMAGES,
   ValidationError,
 } from "../../../lib/reviewImages";
 import { verifyPassword, isValidPin } from "../../../lib/passwords";
@@ -10,7 +11,7 @@ import { verifyPassword, isValidPin } from "../../../lib/passwords";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const PUBLIC_COLS = "id, name, rating, content, image_url, created_at, updated_at";
+const PUBLIC_COLS = "id, name, rating, content, image_urls, created_at, updated_at";
 
 // 비밀번호를 검증하고 해당 후기 행을 반환. 실패 시 NextResponse(에러)를 throw 합니다.
 async function authorize(supabase, id, password) {
@@ -19,7 +20,7 @@ async function authorize(supabase, id, password) {
   }
   const { data: row, error } = await supabase
     .from("reviews")
-    .select("id, image_url, password_hash")
+    .select("id, image_urls, password_hash")
     .eq("id", id)
     .single();
   if (error || !row) {
@@ -60,17 +61,24 @@ export async function PATCH(request, { params }) {
       update.rating = rating;
     }
 
-    const removeImage = String(form.get("removeImage") ?? "") === "true";
-    const newImage = form.get("image");
-    const hasNewImage =
-      newImage && typeof newImage.arrayBuffer === "function" && newImage.size > 0;
+    // 이미지 수정: removeImages(전체 삭제) + 새 이미지 추가(기존에 이어붙임)
+    const removeImages = String(form.get("removeImages") ?? "") === "true";
+    const existing = Array.isArray(row.image_urls) ? row.image_urls : [];
+    const newUrls = await uploadReviewImages(supabase, form.getAll("image"));
 
-    if (hasNewImage) {
-      update.image_url = await uploadReviewImage(supabase, newImage);
-      await deleteReviewImage(supabase, row.image_url); // 이전 사진 정리
-    } else if (removeImage) {
-      update.image_url = null;
-      await deleteReviewImage(supabase, row.image_url);
+    if (removeImages || newUrls.length > 0) {
+      const kept = removeImages ? [] : existing;
+      const combined = [...kept, ...newUrls];
+      if (combined.length > MAX_IMAGES) {
+        return NextResponse.json(
+          { error: `사진은 최대 ${MAX_IMAGES}장까지 첨부할 수 있습니다.` },
+          { status: 400 }
+        );
+      }
+      // 삭제 대상(기존 - 유지) 파일 정리
+      const removed = existing.filter((u) => !combined.includes(u));
+      for (const u of removed) await deleteReviewImage(supabase, u);
+      update.image_urls = combined;
     }
 
     if (Object.keys(update).length === 0) {
@@ -106,7 +114,7 @@ export async function DELETE(request, { params }) {
 
     const { error } = await supabase.from("reviews").delete().eq("id", params.id);
     if (error) throw error;
-    await deleteReviewImage(supabase, row.image_url);
+    for (const u of row.image_urls || []) await deleteReviewImage(supabase, u);
 
     return NextResponse.json({ ok: true });
   } catch (err) {

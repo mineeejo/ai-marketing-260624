@@ -38,8 +38,8 @@ create table if not exists reviews (
   name text not null,
   rating int not null check (rating between 1 and 5),
   content text not null,
-  image_url text,
-  password_hash text not null,           -- 글 수정/삭제용 4자리 비밀번호(해시 저장)
+  image_urls jsonb not null default '[]'::jsonb,  -- 후기 사진 URL 배열(최대 10장)
+  password_hash text not null,                    -- 글 수정/삭제용 4자리 비밀번호(해시 저장)
   created_at timestamptz not null default now(),
   updated_at timestamptz
 );
@@ -47,6 +47,7 @@ create table if not exists reviews (
 
 > 이미 이전 버전 테이블을 만들었다면 아래로 컬럼만 추가하세요:
 > ```sql
+> alter table reviews add column if not exists image_urls jsonb not null default '[]'::jsonb;
 > alter table reviews add column if not exists password_hash text not null default '';
 > alter table reviews add column if not exists updated_at timestamptz;
 > ```

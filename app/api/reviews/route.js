@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "../../lib/supabase";
-import { uploadReviewImage, ValidationError } from "../../lib/reviewImages";
+import { uploadReviewImages, ValidationError } from "../../lib/reviewImages";
 import { hashPassword, isValidPin } from "../../lib/passwords";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 // 조회 시 비밀번호 해시는 절대 내려보내지 않습니다.
-const PUBLIC_COLS = "id, name, rating, content, image_url, created_at, updated_at";
+const PUBLIC_COLS = "id, name, rating, content, image_urls, created_at, updated_at";
 
 // GET /api/reviews — 후기 목록 조회
 export async function GET() {
@@ -37,7 +37,7 @@ export async function POST(request) {
     const content = String(form.get("content") ?? "").trim();
     const rating = parseInt(String(form.get("rating") ?? "5"), 10);
     const password = String(form.get("password") ?? "");
-    const image = form.get("image");
+    const images = form.getAll("image");
 
     if (!name || name.length > 30) {
       return NextResponse.json({ error: "이름은 1~30자로 입력해주세요." }, { status: 400 });
@@ -59,7 +59,7 @@ export async function POST(request) {
     }
 
     const supabase = getSupabase();
-    const imageUrl = await uploadReviewImage(supabase, image);
+    const imageUrls = await uploadReviewImages(supabase, images);
 
     const { data, error } = await supabase
       .from("reviews")
@@ -67,7 +67,7 @@ export async function POST(request) {
         name,
         rating,
         content,
-        image_url: imageUrl,
+        image_urls: imageUrls,
         password_hash: hashPassword(password),
       })
       .select(PUBLIC_COLS)
