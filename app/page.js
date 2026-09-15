@@ -6,9 +6,9 @@ const VIDEO_URL =
   "https://d8j0ntlcm91z4.cloudfront.net/user_3CkUAX5vl7hsRPpzsmLNJVSyYqp/hf_20260626_041746_4ec96dc5-b701-4029-9e9f-adc136e500a5.mp4";
 
 const NAV = [
-  { href: "/tours", label: "Tours" },
-  { href: "/why", label: "Why us" },
-  { href: "/reviews", label: "Reviews" },
+  { href: "/tours", label: "투어 상품" },
+  { href: "/why", label: "조이감성투어" },
+  { href: "/reviews", label: "고객 후기" },
 ];
 
 export default function LandingPage() {
@@ -52,7 +52,7 @@ export default function LandingPage() {
                 href="/book"
                 className="ml-auto bg-black text-white text-sm font-medium px-4 sm:px-5 py-2 rounded-xl hover:bg-gray-800 transition-colors whitespace-nowrap"
               >
-                Book a tour
+                예약·문의
               </Link>
             </div>
 
@@ -62,7 +62,7 @@ export default function LandingPage() {
             {/* Bottom row */}
             <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
               <p className="text-white text-3xl sm:text-4xl xl:text-5xl font-medium leading-tight drop-shadow-lg lg:max-w-xl shrink-0">
-                Witness the wonder of the
+                그랜드캐년의 경이로움을
                 <br />
                 <span
                   style={{
@@ -71,9 +71,9 @@ export default function LandingPage() {
                     fontWeight: 400,
                   }}
                 >
-                  Grand Canyon
-                </span>{" "}
-                with 조이감성투어
+                  조이감성투어
+                </span>
+                와 함께 만나보세요
               </p>
 
               {/* KakaoTalk card (replaces the old contact form) */}
@@ -109,8 +109,8 @@ export default function LandingPage() {
             <p>라스베가스 스트립 내 호텔 픽업</p>
             <div className="flex sm:justify-end gap-4 mt-3">
               <Link href="/tours" className="hover:text-white transition-colors">투어 상품</Link>
-              <Link href="/why" className="hover:text-white transition-colors">왜 조이감성투어</Link>
-              <Link href="/reviews" className="hover:text-white transition-colors">여행 후기</Link>
+              <Link href="/why" className="hover:text-white transition-colors">조이감성투어</Link>
+              <Link href="/reviews" className="hover:text-white transition-colors">고객 후기</Link>
             </div>
           </div>
         </div>

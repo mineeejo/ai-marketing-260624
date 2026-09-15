@@ -172,6 +172,8 @@ a {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  font-size: 0; /* 이미지 로드 실패 시 alt 텍스트가 거대하게 표시되는 것 방지 */
+  color: transparent;
 }
 .tour-card .body {
   padding: 18px 20px 22px;
@@ -210,6 +212,202 @@ a {
   color: var(--muted);
   font-size: 13px;
 }
+.tour-card .price .was {
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: line-through;
+}
+.tour-card .price .now {
+  color: var(--accent-dark);
+  font-size: 20px;
+  font-weight: 800;
+}
+.tour-card .price .kakao-tag {
+  display: inline-block;
+  background: #fee500;
+  color: #3a1d1d;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 999px;
+  vertical-align: middle;
+}
+.tour-card .price .price-sub {
+  font-weight: 500;
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* 썸네일 할인 리본 */
+.thumb {
+  position: relative;
+}
+.thumb-ribbon {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: #fee500;
+  color: #3a1d1d;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 5px 12px;
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+}
+
+/* ---------- 곧 공개(COMING SOON) 카드 ---------- */
+.tour-card.soon {
+  border-style: dashed;
+  border-color: #c7cede;
+  background: linear-gradient(180deg, #fbfcff 0%, #f2f5fb 100%);
+  box-shadow: none;
+}
+.tour-card.soon:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow);
+}
+.soon-thumb {
+  background: linear-gradient(135deg, #eef1f7 0%, #dfe4ee 100%);
+  filter: grayscale(0.1);
+  opacity: 0.85;
+}
+.badge-soon {
+  background: #1a2030 !important;
+  color: #fff !important;
+  letter-spacing: 0.04em;
+}
+.soon-price {
+  color: var(--muted) !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+}
+.soon-hero {
+  background: linear-gradient(135deg, #eef1f7 0%, #dfe4ee 100%);
+  border: 2px dashed #c7cede;
+  border-radius: 20px;
+  padding: 56px;
+  font-size: 88px;
+  margin-bottom: 20px;
+}
+
+/* ---------- 카톡 할인 배너 / 가격 ---------- */
+.kakao-banner {
+  background: #fff8c2;
+  border: 1px solid #fee500;
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin: 0 0 24px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.chip-price s {
+  color: var(--muted);
+  font-weight: 500;
+}
+.chip-price em {
+  font-style: normal;
+  background: #fee500;
+  color: #3a1d1d;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+.price-breakdown {
+  list-style: none;
+  padding: 14px 18px;
+  margin: 14px 0 0;
+  background: #fff8c2;
+  border-radius: 12px;
+  font-size: 14px;
+}
+.price-breakdown li {
+  margin-bottom: 4px;
+}
+
+/* ---------- 예약·문의(book) 페이지 ---------- */
+.kakao-id-big {
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  color: var(--accent-dark);
+  margin: 6px 0 0;
+}
+.reason-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+.reason-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+.reason-ico {
+  font-size: 30px;
+}
+.reason-card h3 {
+  font-size: 15px;
+  margin: 8px 0 6px;
+}
+.reason-card p {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.55;
+}
+.discount-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.discount-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  box-shadow: var(--shadow);
+  transition: transform 0.15s;
+}
+.discount-row:hover {
+  transform: translateY(-2px);
+}
+.discount-row .d-title {
+  font-weight: 700;
+  font-size: 15px;
+}
+.discount-row .d-price {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.discount-row .d-price s {
+  color: var(--muted);
+  font-size: 13px;
+}
+.discount-row .d-price strong {
+  color: var(--accent-dark);
+  font-size: 18px;
+}
+.discount-row .d-price em {
+  font-style: normal;
+  background: #fee500;
+  color: #3a1d1d;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
 
 /* ---------- Tour detail ---------- */
 .detail-hero {
@@ -227,6 +425,8 @@ a {
   width: calc(100% + 96px);
   object-fit: cover;
   margin: -48px;
+  font-size: 0; /* 이미지 로드 실패 시 alt 텍스트가 거대하게 표시되는 것 방지 */
+  color: transparent;
 }
 .detail-title {
   font-size: 30px;
