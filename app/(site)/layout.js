@@ -1,23 +1,12 @@
 import Link from "next/link";
+import SiteNav from "./SiteNav";
 
 // 투어 상세·연락처·후기 페이지는 공통 헤더/푸터를 갖습니다.
 // 메인 랜딩(/)은 이 레이아웃 밖에 있어 풀스크린으로 표시됩니다.
 export default function SiteLayout({ children }) {
   return (
     <>
-      <header className="site-header">
-        <div className="container header-inner">
-          <Link href="/" className="brand">
-            🏜️ 조이감성<span>투어</span>
-          </Link>
-          <nav className="nav">
-            <Link href="/tours">투어 상품</Link>
-            <Link href="/why">조이감성투어</Link>
-            <Link href="/reviews">고객 후기</Link>
-            <Link href="/book">예약·문의</Link>
-          </nav>
-        </div>
-      </header>
+      <SiteNav />
 
       <main className="container main">{children}</main>
 

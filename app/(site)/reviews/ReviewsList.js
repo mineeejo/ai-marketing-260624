@@ -88,7 +88,9 @@ function ReviewItem({ review, onUpdated, onDeleted }) {
   }
 
   async function handleDelete() {
-    const pw = window.prompt("삭제하려면 비밀번호(4자리)를 입력하세요.");
+    const pw = window.prompt(
+      "삭제하려면 비밀번호를 입력하세요.\n(작성 시 등록한 4자리 · 관리자는 관리자 비밀번호)"
+    );
     if (pw == null) return;
     setErr(null);
     setBusy(true);
@@ -111,12 +113,10 @@ function ReviewItem({ review, onUpdated, onDeleted }) {
       <form className="review-item" onSubmit={handleEdit}>
         {err && <p className="form-msg error">{err}</p>}
         <div className="field">
-          <label>비밀번호 (작성 시 입력한 4자리)</label>
+          <label>비밀번호 (작성 시 입력한 4자리 · 관리자는 관리자 비밀번호)</label>
           <input
             name="password"
-            inputMode="numeric"
-            pattern="\d{4}"
-            maxLength={4}
+            maxLength={32}
             required
             placeholder="****"
           />

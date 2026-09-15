@@ -7,7 +7,7 @@ const VIDEO_URL =
 
 const NAV = [
   { href: "/tours", label: "투어 상품" },
-  { href: "/why", label: "조이감성투어" },
+  { href: "/why", label: "왜 조이감성투어인가요?" },
   { href: "/reviews", label: "고객 후기" },
 ];
 
@@ -109,7 +109,7 @@ export default function LandingPage() {
             <p>라스베가스 스트립 내 호텔 픽업</p>
             <div className="flex sm:justify-end gap-4 mt-3">
               <Link href="/tours" className="hover:text-white transition-colors">투어 상품</Link>
-              <Link href="/why" className="hover:text-white transition-colors">조이감성투어</Link>
+              <Link href="/why" className="hover:text-white transition-colors">왜 조이감성투어인가요?</Link>
               <Link href="/reviews" className="hover:text-white transition-colors">고객 후기</Link>
             </div>
           </div>

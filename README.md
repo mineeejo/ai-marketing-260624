@@ -2,10 +2,11 @@
 
 Next.js 14 (App Router) 기반 그랜드캐년 투어 홍보 홈페이지입니다.
 
-- **메인 랜딩(`/`)** — 그랜드캐년 풀스크린 배경 영상 + 문의 폼 (Tailwind, lucide-react)
+- **메인 랜딩(`/`)** — 그랜드캐년 풀스크린 배경 영상 + 카카오톡 예약 안내 (Tailwind, lucide-react)
 - **투어 상품 소개** — `/tours` 목록 + `/tours/[id]` 상세. 상품은 `app/lib/tours.js` 에서 관리
-- **연락처 안내** — `/contact`
-- **여행 후기 게시판** — `/reviews`. 사용자가 사진과 함께 후기를 직접 작성 (Supabase 저장)
+- **왜 조이감성투어인가요?** — `/why`
+- **예약·문의** — `/book` (카카오톡 예약 안내)
+- **고객 후기 게시판** — `/reviews`. 사용자가 사진과 함께 후기를 직접 작성 (Supabase 저장)
 
 ## 기술 스택
 - Next.js 14 / React 18
@@ -58,6 +59,7 @@ create table if not exists reviews (
 `.env.example` 을 참고해 `.env.local` 파일을 만들고 값 채우기:
 - `SUPABASE_URL` : Project Settings → API → Project URL
 - `SUPABASE_SERVICE_ROLE_KEY` : Project Settings → API → service_role 키 (⚠️ 비공개, 서버에서만 사용)
+- `ADMIN_PASSWORD` : 관리자 마스터 비밀번호(예: `0113`). 후기 수정/삭제 시 이 값을 입력하면 작성자와 무관하게 모든 글을 관리할 수 있습니다.
 
 ```bash
 cp .env.example .env.local
@@ -67,12 +69,17 @@ npm run dev
 
 `http://localhost:3000` 접속.
 
+> **후기 권한 정리**
+> - 조회: 누구나
+> - 수정/삭제: 작성 시 등록한 4자리 비밀번호를 아는 본인
+> - 관리자(사장님): `ADMIN_PASSWORD` 값을 수정/삭제 비밀번호 칸에 입력 → 모든 글 관리 가능
+
 ---
 
 ## ☁️ Vercel 배포
 
 1. https://vercel.com 에서 GitHub 저장소(`mineeejo/ai-marketing-260624`) 연결 → **Import**
-2. **Environment Variables** 에 `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` 등록
+2. **Environment Variables** 에 `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD` 등록
 3. **Deploy** — 이후 브랜치에 push 하면 자동 재배포
 
 > 참고: Supabase 무료 플랜은 1주일간 접속이 전혀 없으면 DB가 일시정지됩니다. 대시보드에서 재개할 수 있습니다.

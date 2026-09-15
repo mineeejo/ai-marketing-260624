@@ -14,8 +14,13 @@ export const dynamic = "force-dynamic";
 const PUBLIC_COLS = "id, name, rating, content, image_urls, created_at, updated_at";
 
 // 비밀번호를 검증하고 해당 후기 행을 반환. 실패 시 NextResponse(에러)를 throw 합니다.
+// 작성자 본인(4자리 PIN) 또는 관리자(마스터 비밀번호 = ADMIN_PASSWORD 환경변수) 통과.
 async function authorize(supabase, id, password) {
-  if (!isValidPin(password)) {
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  const isAdmin = Boolean(adminPassword) && password === adminPassword;
+
+  // 관리자 마스터 비밀번호는 4자리 제한 없이 허용(영문·숫자 등 자유). 일반 사용자는 4자리 PIN.
+  if (!isAdmin && !isValidPin(password)) {
     throw NextResponse.json({ error: "비밀번호는 숫자 4자리입니다." }, { status: 400 });
   }
   const { data: row, error } = await supabase
@@ -26,7 +31,8 @@ async function authorize(supabase, id, password) {
   if (error || !row) {
     throw NextResponse.json({ error: "후기를 찾을 수 없습니다." }, { status: 404 });
   }
-  if (!verifyPassword(password, row.password_hash)) {
+  // 관리자는 작성자 비밀번호와 무관하게 모든 글 수정/삭제 가능.
+  if (!isAdmin && !verifyPassword(password, row.password_hash)) {
     throw NextResponse.json({ error: "비밀번호가 일치하지 않습니다." }, { status: 403 });
   }
   return row;
