@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { RATING_OPTIONS, MAX_IMAGES, withCompressedImages } from "./shared";
+import { MAX_IMAGES, withCompressedImages } from "./shared";
 
 export default function ReviewForm() {
   const router = useRouter();
@@ -52,17 +52,6 @@ export default function ReviewForm() {
             placeholder="수정·삭제 시 필요"
           />
         </div>
-      </div>
-
-      <div className="field">
-        <label htmlFor="rating">평점</label>
-        <select id="rating" name="rating" defaultValue="5">
-          {RATING_OPTIONS.map((o) => (
-            <option key={o.v} value={o.v}>
-              {o.label}
-            </option>
-          ))}
-        </select>
       </div>
 
       <div className="field">

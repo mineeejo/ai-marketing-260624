@@ -1,14 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  RATING_OPTIONS,
-  MAX_IMAGES,
-  Stars,
-  Gallery,
-  formatDate,
-  withCompressedImages,
-} from "./shared";
+import { MAX_IMAGES, Gallery, formatDate, withCompressedImages } from "./shared";
 
 export default function ReviewsList() {
   const [reviews, setReviews] = useState([]);
@@ -169,16 +162,6 @@ function ReviewItem({ review, isAdmin, onUpdated, onDeleted }) {
           </div>
         )}
         <div className="field">
-          <label>평점</label>
-          <select name="rating" defaultValue={String(review.rating)}>
-            {RATING_OPTIONS.map((o) => (
-              <option key={o.v} value={o.v}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="field">
           <label>후기 내용</label>
           <textarea name="content" maxLength={2000} required defaultValue={review.content} />
         </div>
@@ -220,7 +203,6 @@ function ReviewItem({ review, isAdmin, onUpdated, onDeleted }) {
           {review.updated_at && review.updated_at !== review.created_at ? " (수정됨)" : ""}
         </span>
       </div>
-      <Stars n={review.rating} />
       <p className="content">{review.content}</p>
       <Gallery urls={review.image_urls} />
 

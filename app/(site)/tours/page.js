@@ -65,11 +65,7 @@ export default async function ToursPage() {
       </div>
 
       <p className="section-sub" style={{ marginTop: 28, textAlign: "center" }}>
-        더 많은 코스가 곧 공개됩니다. 오픈 소식을 가장 먼저 받고 싶다면{" "}
-        <Link href="/book" style={{ color: "var(--accent)", fontWeight: 700 }}>
-          카톡으로 미리 알림 신청
-        </Link>
-        하세요!
+        더 많은 코스가 곧 공개됩니다. 조금만 기다려주세요! ✨
       </p>
     </section>
   );

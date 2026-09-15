@@ -1,5 +1,5 @@
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css");
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Jua&family=Instrument+Serif:ital@0;1&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -15,8 +15,29 @@
   --accent-dark: #0a5d50;
   --accent-soft: #e4f4f0;
   --star: #f5a524;
+  --kakao: #fee500;
+  --kakao-ink: #3a1d1d;
   --shadow: 0 6px 24px rgba(20, 30, 60, 0.08);
   --radius: 14px;
+  --font-display: "Jua", "Pretendard", -apple-system, BlinkMacSystemFont, system-ui,
+    sans-serif;
+}
+
+/* 동글동글 라운드 고딕(Jua)을 제목·강조 요소에 적용 */
+.brand,
+.section-title,
+.detail-title,
+.detail-section h2,
+.tour-card h3,
+.tour-card .badge,
+.contact-card h3,
+.kakao-id-big,
+.reason-card h3,
+.review-item .who,
+.itinerary li strong {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0.01em;
 }
 
 * {
@@ -871,4 +892,75 @@ a {
   .footer-meta {
     text-align: left;
   }
+}
+
+/* ============ 메인 랜딩(원페이지) ============ */
+.lp{background:var(--bg);}
+.lp a{color:inherit;text-decoration:none;}
+
+.lp-hero-wrap{padding:14px;}
+.lp-hero{position:relative;border-radius:26px;overflow:hidden;min-height:88vh;
+  background:linear-gradient(160deg,#f6b26b 0%,#d98246 26%,#9c4f30 52%,#5e3320 74%,#2b1a14 100%);}
+.lp-hero>video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.lp-hero>.lp-scrim{position:absolute;inset:0;z-index:1;background:
+  radial-gradient(120% 80% at 82% 8%,rgba(255,225,170,.35),transparent 55%),
+  linear-gradient(to top,rgba(0,0,0,.6),rgba(0,0,0,.06) 46%,rgba(0,0,0,.16));}
+.lp-hero-content{position:relative;z-index:2;display:flex;flex-direction:column;min-height:88vh;padding:20px;gap:22px;}
+
+.lp-nav{align-self:stretch;background:rgba(255,255,255,.72);backdrop-filter:blur(10px);border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.1);padding:10px 12px 10px 18px;display:flex;align-items:center;gap:18px;position:relative;}
+.lp-logo{font-family:var(--font-display);font-size:20px;color:#111;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.lp-logo span{color:var(--accent);}
+.lp-nav-links{display:none;gap:22px;margin-left:auto;align-items:center;}
+.lp-nav-links a{font-size:15px;font-weight:700;color:#2b3243;transition:color .15s;white-space:nowrap;}
+.lp-nav-links a:hover{color:var(--accent);}
+.lp-book{background:var(--accent);color:#fff;font-family:var(--font-display);font-size:15px;padding:9px 20px;border-radius:12px;white-space:nowrap;}
+.lp-book:hover{background:var(--accent-dark);}
+/* 모바일 햄버거 (<details>) */
+.lp-menu{margin-left:auto;position:relative;}
+.lp-menu>summary{list-style:none;cursor:pointer;font-size:24px;line-height:1;color:#111;padding:2px 6px;}
+.lp-menu>summary::-webkit-details-marker{display:none;}
+.lp-menu[open]>summary{color:var(--accent-dark);}
+.lp-menu-panel{position:absolute;right:0;top:38px;background:#fff;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:6px;min-width:190px;display:flex;flex-direction:column;z-index:5;}
+.lp-menu-panel a{padding:12px 16px;font-weight:700;color:#2b3243;border-radius:10px;}
+.lp-menu-panel a:hover{background:var(--accent-soft);color:var(--accent-dark);}
+
+.lp-spacer{flex:1;min-height:1rem;}
+.lp-bottom{display:flex;flex-direction:column;gap:20px;}
+.lp-headline{color:#fff;font-family:var(--font-display);font-size:32px;line-height:1.32;text-shadow:0 2px 14px rgba(0,0,0,.45);}
+.lp-headline .lp-accent{color:#ffd84d;}
+.lp-herocard{width:100%;background:#fff;border-radius:22px;box-shadow:0 20px 50px rgba(0,0,0,.3);padding:22px;}
+.lp-herocard .k-label{font-size:13px;color:var(--muted);}
+.lp-herocard .k-brand{font-family:var(--font-display);font-size:24px;margin-top:2px;}
+.lp-herocard .k-id{margin-top:12px;font-family:var(--font-display);font-size:20px;color:var(--accent-dark);}
+.lp-herocard .k-note{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.6;}
+.lp-herocard .k-cta{display:inline-block;margin-top:14px;background:var(--kakao);color:var(--kakao-ink);font-weight:800;font-size:14px;padding:11px 18px;border-radius:12px;}
+
+.lp-section{max-width:1120px;margin:0 auto;padding:64px 20px;}
+.lp-section.tint{background:#f2f4f1;border-top:1px solid #e8ebe6;border-bottom:1px solid #e8ebe6;max-width:none;}
+.lp-section.tint>.lp-inner{max-width:1120px;margin:0 auto;}
+.lp-center{text-align:center;margin-bottom:36px;}
+.lp-eyebrow{font-size:13px;font-weight:800;color:var(--accent);letter-spacing:.18em;}
+.lp-h2{font-family:var(--font-display);font-size:30px;margin-top:10px;text-wrap:balance;}
+.lp-more{display:inline-block;margin-top:26px;font-family:var(--font-display);background:var(--accent);color:#fff;padding:12px 26px;border-radius:999px;}
+.lp-more:hover{background:var(--accent-dark);}
+.lp-more.ghost{background:#fff;color:var(--accent-dark);border:1px solid var(--accent);}
+
+.lp-footer{background:#0e1422;color:#c4cbd8;}
+.lp-footer-inner{max-width:1120px;margin:0 auto;padding:44px 20px;display:flex;flex-direction:column;gap:20px;justify-content:space-between;}
+.lp-footer .brand{font-family:var(--font-display);color:#fff;font-size:20px;}
+.lp-footer p{font-size:14px;margin-top:4px;}
+.lp-footer .fnav{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap;}
+.lp-footer .fnav a:hover{color:#fff;}
+
+@media(min-width:640px){
+  .lp-nav-links{display:flex;}
+  .lp-menu{display:none;}
+  .lp-headline{font-size:40px;}
+}
+@media(min-width:1024px){
+  .lp-hero-wrap{padding:22px;}
+  .lp-hero,.lp-hero-content{min-height:calc(100vh - 44px);}
+  .lp-bottom{flex-direction:row;align-items:flex-end;justify-content:space-between;}
+  .lp-headline{font-size:50px;max-width:640px;}
+  .lp-herocard{width:min(430px,42%);}
 }
