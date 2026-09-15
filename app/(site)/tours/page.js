@@ -45,7 +45,7 @@ export default function ToursPage() {
                     <>
                       <span className="was">{formatPrice(t.price, t.currency)}</span>{" "}
                       <span className="now">{formatPrice(t.priceKakao, t.currency)}</span>{" "}
-                      <small className="kakao-tag">카톡가</small>
+                      <small className="kakao-tag">카톡 예약 시</small>
                     </>
                   ) : (
                     formatPrice(t.price, t.currency)

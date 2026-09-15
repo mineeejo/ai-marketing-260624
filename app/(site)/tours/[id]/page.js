@@ -65,7 +65,7 @@ export default function TourDetailPage({ params }) {
           <span className="chip chip-price">
             💰 <s>{formatPrice(tour.price, tour.currency)}</s>{" "}
             <strong>{formatPrice(tour.priceKakao, tour.currency)}</strong>{" "}
-            <em>카톡가</em>
+            <em>카톡 예약 시</em>
           </span>
         ) : (
           <span className="chip">💰 {formatPrice(tour.price, tour.currency)}</span>

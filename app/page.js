@@ -37,23 +37,25 @@ export default function LandingPage() {
                   <path d="M 256 128 L 128 128 L 0 0 L 128 0 Z" fill="#000" />
                 </svg>
               </Link>
-              <nav className="hidden sm:flex items-center gap-6">
-                {NAV.map((n) => (
-                  <Link
-                    key={n.href}
-                    href={n.href}
-                    className="text-gray-800 text-sm font-medium hover:opacity-60 transition-opacity whitespace-nowrap"
-                  >
-                    {n.label}
-                  </Link>
-                ))}
-              </nav>
-              <Link
-                href="/book"
-                className="ml-auto bg-black text-white text-sm font-medium px-4 sm:px-5 py-2 rounded-xl hover:bg-gray-800 transition-colors whitespace-nowrap"
-              >
-                예약·문의
-              </Link>
+              <div className="ml-auto flex items-center gap-4 sm:gap-6">
+                <nav className="hidden sm:flex items-center gap-6">
+                  {NAV.map((n) => (
+                    <Link
+                      key={n.href}
+                      href={n.href}
+                      className="text-gray-800 text-sm font-medium hover:opacity-60 transition-opacity whitespace-nowrap"
+                    >
+                      {n.label}
+                    </Link>
+                  ))}
+                </nav>
+                <Link
+                  href="/book"
+                  className="bg-black text-white text-sm font-medium px-4 sm:px-5 py-2 rounded-xl hover:bg-gray-800 transition-colors whitespace-nowrap"
+                >
+                  예약·문의
+                </Link>
+              </div>
             </div>
 
             {/* Spacer */}
