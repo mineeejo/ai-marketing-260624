@@ -1,14 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { tours, getTour, formatPrice } from "../../../lib/tours";
+import { formatPrice } from "../../../lib/tours";
+import { getTourById } from "../../../lib/toursDb";
 import { KAKAO_ID } from "../../../lib/site";
 
-export function generateStaticParams() {
-  return tours.map((t) => ({ id: t.id }));
-}
+export const dynamic = "force-dynamic"; // 관리자 편집이 바로 반영되도록
 
-export function generateMetadata({ params }) {
-  const tour = getTour(params.id);
+export async function generateMetadata({ params }) {
+  const tour = await getTourById(params.id);
   if (!tour) return { title: "상품을 찾을 수 없습니다 | 조이감성투어" };
   return {
     title: `${tour.title} | 조이감성투어`,
@@ -16,8 +15,8 @@ export function generateMetadata({ params }) {
   };
 }
 
-export default function TourDetailPage({ params }) {
-  const tour = getTour(params.id);
+export default async function TourDetailPage({ params }) {
+  const tour = await getTourById(params.id);
   if (!tour) notFound();
 
   // 곧 공개되는 코스: 기대감 조성 티저 페이지

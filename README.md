@@ -57,7 +57,22 @@ create table if not exists reviews (
 > alter table reviews add column if not exists admin_reply_at timestamptz;
 > ```
 
-3. **Storage** → **New bucket** → 이름 `review-images`, **Public bucket 체크** (사진 공개 표시용)
+3. (상품 직접 편집용) **투어 상품 테이블**도 같은 SQL Editor 에서 생성:
+
+```sql
+create table if not exists tours (
+  id text primary key,
+  sort int not null default 0,
+  data jsonb not null,
+  updated_at timestamptz not null default now()
+);
+```
+
+> 테이블만 만들고 비워두면 사이트는 코드 기본 상품을 보여줍니다.
+> 관리자가 `/admin/tours` 에서 **"현재 상품 불러와서 편집 시작"** 버튼을 누르면
+> 기본 상품이 DB로 복사되고, 그때부터 브라우저에서 직접 수정할 수 있습니다.
+
+4. **Storage** → **New bucket** → 이름 `review-images`, **Public bucket 체크** (사진 공개 표시용)
 
 ### 3. 환경변수 등록
 `.env.example` 을 참고해 `.env.local` 파일을 만들고 값 채우기:

@@ -64,8 +64,9 @@ export default function AdminPage() {
             이제 <Link href="/reviews" style={{ color: "var(--accent-dark)", fontWeight: 700 }}>고객 후기</Link>에서
             모든 글을 비밀번호 없이 수정·삭제하고, 답글을 달 수 있어요.
           </p>
-          <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 16 }}>
-            <Link href="/reviews" className="btn">후기 관리하러 가기</Link>
+          <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 16, flexWrap: "wrap" }}>
+            <Link href="/admin/tours" className="btn">상품 관리</Link>
+            <Link href="/reviews" className="btn">후기 관리</Link>
             <button type="button" className="btn btn-ghost" onClick={handleLogout}>
               로그아웃
             </button>
