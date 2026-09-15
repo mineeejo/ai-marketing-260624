@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "../../lib/supabase";
-import { uploadReviewImages, ValidationError } from "../../lib/reviewImages";
+import { MAX_IMAGES } from "../../lib/reviewImages";
 import { hashPassword, isValidPin } from "../../lib/passwords";
 
 export const runtime = "nodejs";
@@ -30,15 +30,17 @@ export async function GET() {
   }
 }
 
-// POST /api/reviews — 후기 작성 (multipart/form-data, 이미지 선택)
+// POST /api/reviews — 후기 작성 (JSON)
+// 사진은 /api/reviews/upload 로 한 장씩 먼저 올리고, 그 URL 배열을 여기로 보냅니다.
 export async function POST(request) {
   try {
-    const form = await request.formData();
-    const name = String(form.get("name") ?? "").trim();
-    const content = String(form.get("content") ?? "").trim();
-    const rating = parseInt(String(form.get("rating") ?? "5"), 10);
-    const password = String(form.get("password") ?? "");
-    const images = form.getAll("image");
+    const body = await request.json().catch(() => ({}));
+    const name = String(body.name ?? "").trim();
+    const content = String(body.content ?? "").trim();
+    const password = String(body.password ?? "");
+    const imageUrls = Array.isArray(body.imageUrls)
+      ? body.imageUrls.filter((u) => typeof u === "string" && u).slice(0, MAX_IMAGES)
+      : [];
 
     if (!name || name.length > 30) {
       return NextResponse.json({ error: "이름은 1~30자로 입력해주세요." }, { status: 400 });
@@ -49,9 +51,6 @@ export async function POST(request) {
         { status: 400 }
       );
     }
-    if (!(rating >= 1 && rating <= 5)) {
-      return NextResponse.json({ error: "평점이 올바르지 않습니다." }, { status: 400 });
-    }
     if (!isValidPin(password)) {
       return NextResponse.json(
         { error: "수정/삭제용 비밀번호는 숫자 4자리로 입력해주세요." },
@@ -60,13 +59,11 @@ export async function POST(request) {
     }
 
     const supabase = getSupabase();
-    const imageUrls = await uploadReviewImages(supabase, images);
-
     const { data, error } = await supabase
       .from("reviews")
       .insert({
         name,
-        rating,
+        rating: 5, // 별점 기능 제거 — 기본값 저장
         content,
         image_urls: imageUrls,
         password_hash: hashPassword(password),
@@ -77,10 +74,9 @@ export async function POST(request) {
     if (error) throw error;
     return NextResponse.json({ review: data }, { status: 201 });
   } catch (err) {
-    const status = err instanceof ValidationError ? 400 : 500;
     return NextResponse.json(
       { error: err.message ?? "후기 등록에 실패했습니다." },
-      { status }
+      { status: 500 }
     );
   }
 }

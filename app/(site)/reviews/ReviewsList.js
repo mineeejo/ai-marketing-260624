@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MAX_IMAGES, Gallery, formatDate, withCompressedImages } from "./shared";
+import { MAX_IMAGES, Gallery, formatDate } from "./shared";
+import { uploadImages } from "./ReviewForm";
 
 export default function ReviewsList() {
   const [reviews, setReviews] = useState([]);
@@ -73,14 +74,19 @@ function ReviewItem({ review, isAdmin, onUpdated, onDeleted }) {
     setErr(null);
     setBusy(true);
     try {
-      const { formData: fd, count } = await withCompressedImages(
-        new FormData(e.currentTarget)
-      );
-      if (count > MAX_IMAGES) {
-        throw new Error(`사진은 최대 ${MAX_IMAGES}장까지 첨부할 수 있습니다.`);
-      }
-      const res = await fetch(`/api/reviews/${review.id}`, { method: "PATCH", body: fd });
-      const data = await res.json();
+      const fd = new FormData(e.currentTarget);
+      const password = String(fd.get("password") || "");
+      const content = String(fd.get("content") || "");
+      const removeImages = fd.get("removeImages") === "true";
+      const files = fd.getAll("image").filter((f) => f && f.size > 0);
+      const addImageUrls = await uploadImages(files);
+
+      const res = await fetch(`/api/reviews/${review.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password, content, removeImages, addImageUrls }),
+      });
+      const data = await res.json().catch(() => ({ error: "수정에 실패했습니다." }));
       if (!res.ok) throw new Error(data.error);
       onUpdated(data.review);
       setEditing(false);
@@ -121,9 +127,14 @@ function ReviewItem({ review, isAdmin, onUpdated, onDeleted }) {
     setErr(null);
     setBusy(true);
     try {
-      const fd = new FormData(e.currentTarget); // adminReply 필드 포함
-      const res = await fetch(`/api/reviews/${review.id}`, { method: "PATCH", body: fd });
-      const data = await res.json();
+      const fd = new FormData(e.currentTarget);
+      const adminReply = String(fd.get("adminReply") || "");
+      const res = await fetch(`/api/reviews/${review.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ adminReply }),
+      });
+      const data = await res.json().catch(() => ({ error: "답글 저장에 실패했습니다." }));
       if (!res.ok) throw new Error(data.error);
       onUpdated(data.review);
       setReplying(false);
@@ -138,10 +149,12 @@ function ReviewItem({ review, isAdmin, onUpdated, onDeleted }) {
     if (!window.confirm("사장님 답글을 삭제할까요?")) return;
     setBusy(true);
     try {
-      const fd = new FormData();
-      fd.append("adminReply", "");
-      const res = await fetch(`/api/reviews/${review.id}`, { method: "PATCH", body: fd });
-      const data = await res.json();
+      const res = await fetch(`/api/reviews/${review.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ adminReply: "" }),
+      });
+      const data = await res.json().catch(() => ({ error: "답글 삭제에 실패했습니다." }));
       if (!res.ok) throw new Error(data.error);
       onUpdated(data.review);
     } catch (e2) {

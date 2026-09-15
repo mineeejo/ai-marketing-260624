@@ -42,9 +42,8 @@
 
 * {
   box-sizing: border-box;
-  font-family: "Inter", "Pretendard", -apple-system, BlinkMacSystemFont, system-ui,
-    sans-serif;
 }
+/* 폰트는 body에서 상속받게 둠 (제목 안의 span도 부모 폰트를 따라감) */
 
 html,
 body {
@@ -730,6 +729,40 @@ a {
   gap: 8px;
   margin-top: 4px;
 }
+
+/* 리뷰 작성 시 선택한 사진 미리보기 */
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+.preview-item {
+  position: relative;
+  aspect-ratio: 1 / 1;
+}
+.preview-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+.preview-remove {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: #1a2030;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
 .photo-thumb {
   width: 100%;
   aspect-ratio: 1 / 1;
@@ -913,8 +946,8 @@ a {
 .lp-nav-links{display:none;gap:22px;margin-left:auto;align-items:center;}
 .lp-nav-links a{font-size:15px;font-weight:700;color:#2b3243;transition:color .15s;white-space:nowrap;}
 .lp-nav-links a:hover{color:var(--accent);}
-.lp-book{background:var(--accent);color:#fff;font-family:var(--font-display);font-size:15px;padding:9px 20px;border-radius:12px;white-space:nowrap;}
-.lp-book:hover{background:var(--accent-dark);}
+.lp-nav-links a.lp-book,.lp-book{background:var(--accent);color:#fff;font-family:var(--font-display);font-size:15px;padding:9px 20px;border-radius:12px;white-space:nowrap;}
+.lp-nav-links a.lp-book:hover,.lp-book:hover{background:var(--accent-dark);color:#fff;}
 /* 모바일 햄버거 (<details>) */
 .lp-menu{margin-left:auto;position:relative;}
 .lp-menu>summary{list-style:none;cursor:pointer;font-size:24px;line-height:1;color:#111;padding:2px 6px;}
@@ -926,8 +959,8 @@ a {
 
 .lp-spacer{flex:1;min-height:1rem;}
 .lp-bottom{display:flex;flex-direction:column;gap:20px;}
-.lp-headline{color:#fff;font-family:var(--font-display);font-size:32px;line-height:1.32;text-shadow:0 2px 14px rgba(0,0,0,.45);}
-.lp-headline .lp-accent{color:#ffd84d;}
+.lp-headline{color:#fff;font-family:var(--font-display);font-size:32px;line-height:1.32;text-shadow:0 2px 8px rgba(0,0,0,.6),0 1px 22px rgba(0,0,0,.45);}
+.lp-headline .lp-accent{color:#ffe14d;text-shadow:0 2px 10px rgba(0,0,0,.75),0 0 2px rgba(0,0,0,.5);}
 .lp-herocard{width:100%;background:#fff;border-radius:22px;box-shadow:0 20px 50px rgba(0,0,0,.3);padding:22px;}
 .lp-herocard .k-label{font-size:13px;color:var(--muted);}
 .lp-herocard .k-brand{font-family:var(--font-display);font-size:24px;margin-top:2px;}
