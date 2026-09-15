@@ -105,6 +105,9 @@
   .stars{color:#f5a524;font-size:15px;margin:4px 0 8px;}
   .review-item .content{white-space:pre-wrap;font-size:14.5px;}
   .review-item .photo{margin-top:12px;border-radius:12px;max-height:220px;width:auto;border:1px solid var(--line);}
+  .admin-reply{margin-top:14px;background:var(--accent-soft);border-left:3px solid var(--accent);border-radius:10px;padding:12px 16px;}
+  .admin-reply .ar-head{font-weight:700;font-size:13px;color:var(--accent-dark);margin-bottom:4px;}
+  .admin-reply .ar-body{margin:0;font-size:14px;}
   .rv-write{display:block;max-width:760px;margin:22px auto 0;text-align:center;background:var(--accent);color:#fff;font-family:var(--font-display);font-size:16px;padding:14px;border-radius:14px;border:none;cursor:pointer;width:100%;}
   .rv-write:hover{background:var(--accent-dark);}
 
@@ -429,7 +432,7 @@ document.getElementById('whyGrid').innerHTML=WHY.map(w=>`
 // Reviews (예시)
 const stars=n=>"★".repeat(n)+"☆".repeat(5-n);
 const REVIEWS=[
-  {name:"김지현",rating:5,when:"2026년 6월 12일",content:"새벽부터 별구경으로 시작해서 그랜드캐년 사우스림까지! 가이드님이 인생샷 명당을 다 알려주셔서 사진 제대로 건졌어요. 카톡 단톡방으로 원본까지 보내주시는 것도 최고 👍",photo:IMG+"hf_20260626_053223_23dff708-92fa-4a83-a907-239321237c24.png"},
+  {name:"김지현",rating:5,when:"2026년 6월 12일",content:"새벽부터 별구경으로 시작해서 그랜드캐년 사우스림까지! 가이드님이 인생샷 명당을 다 알려주셔서 사진 제대로 건졌어요. 카톡 단톡방으로 원본까지 보내주시는 것도 최고 👍",photo:IMG+"hf_20260626_053223_23dff708-92fa-4a83-a907-239321237c24.png",reply:"지현님, 소중한 후기 감사합니다! 다음에도 인생샷 가득한 여행으로 모실게요. 조이감성투어 드림 🙏"},
   {name:"이준호",rating:5,when:"2026년 5월 30일",content:"1박2일 6대캐년 다녀왔는데 진짜 알차요. 자이언·브라이스까지 도니까 하루로는 절대 못 볼 걸 다 봤네요. 숙소도 깔끔했습니다.",photo:null},
   {name:"박서연",rating:4,when:"2026년 5월 18일",content:"엔텔롭캐년 빛기둥 보고 감탄… 일정이 조금 빡세긴 한데 그만큼 많이 봐서 만족해요. 카톡으로 예약하니 할인도 받고 좋았습니다!",photo:null},
 ];
@@ -439,6 +442,7 @@ document.getElementById('reviewList').innerHTML=REVIEWS.map(r=>`
     <div class="stars">${stars(r.rating)}</div>
     <p class="content">${r.content}</p>
     ${r.photo?`<img class="photo" src="${r.photo}" alt="후기 사진">`:""}
+    ${r.reply?`<div class="admin-reply"><div class="ar-head">🧑‍💼 사장님 답글</div><p class="ar-body">${r.reply}</p></div>`:""}
   </div>`).join('');
 
 // Book — reasons & discount

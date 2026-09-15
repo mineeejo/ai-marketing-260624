@@ -7,7 +7,8 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 // 조회 시 비밀번호 해시는 절대 내려보내지 않습니다.
-const PUBLIC_COLS = "id, name, rating, content, image_urls, created_at, updated_at";
+const PUBLIC_COLS =
+  "id, name, rating, content, image_urls, created_at, updated_at, admin_reply, admin_reply_at";
 
 // GET /api/reviews — 후기 목록 조회
 export async function GET() {

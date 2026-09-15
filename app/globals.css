@@ -738,6 +738,72 @@ a {
 .link-btn.danger:hover {
   color: #d23b3b;
 }
+.link-btn.accent {
+  color: var(--accent);
+}
+.link-btn.accent:hover {
+  color: var(--accent-dark);
+}
+
+/* 관리자 모드 배지 */
+.admin-flag {
+  background: #fff8c2;
+  border: 1px solid #fee500;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* 사장님(관리자) 답글 */
+.admin-reply {
+  margin-top: 14px;
+  background: var(--accent-soft);
+  border-left: 3px solid var(--accent);
+  border-radius: 10px;
+  padding: 12px 16px;
+}
+.admin-reply .ar-head {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--accent-dark);
+  margin-bottom: 4px;
+}
+.admin-reply .ar-body {
+  margin: 0;
+  font-size: 14px;
+  white-space: pre-wrap;
+}
+.admin-reply .ar-actions {
+  display: flex;
+  gap: 14px;
+  margin-top: 8px;
+}
+.admin-reply-form {
+  margin-top: 14px;
+  background: var(--accent-soft);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.admin-reply-form label {
+  display: block;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--accent-dark);
+  margin-bottom: 6px;
+}
+.admin-reply-form textarea {
+  width: 100%;
+  min-height: 72px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+  background: #fff;
+}
 .empty {
   text-align: center;
   color: var(--muted);

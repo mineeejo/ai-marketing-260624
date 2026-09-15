@@ -7,19 +7,21 @@ import {
   ValidationError,
 } from "../../../lib/reviewImages";
 import { verifyPassword, isValidPin } from "../../../lib/passwords";
+import { isAdminRequest, passwordMatchesAnyAdmin } from "../../../lib/adminAuth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const PUBLIC_COLS = "id, name, rating, content, image_urls, created_at, updated_at";
+const PUBLIC_COLS =
+  "id, name, rating, content, image_urls, created_at, updated_at, admin_reply, admin_reply_at";
 
-// 비밀번호를 검증하고 해당 후기 행을 반환. 실패 시 NextResponse(에러)를 throw 합니다.
-// 작성자 본인(4자리 PIN) 또는 관리자(마스터 비밀번호 = ADMIN_PASSWORD 환경변수) 통과.
-async function authorize(supabase, id, password) {
-  const adminPassword = process.env.ADMIN_PASSWORD;
-  const isAdmin = Boolean(adminPassword) && password === adminPassword;
+// 인증 후 해당 후기 행과 관리자 여부를 반환. 실패 시 NextResponse(에러)를 throw 합니다.
+// 관리자 통과: (1) 관리자 세션 쿠키 로그인 OR (2) 비밀번호 칸에 관리자 비번 직접 입력.
+// 일반 사용자: 작성 시 등록한 4자리 PIN 이 일치해야 함.
+async function authorize(supabase, id, password, request) {
+  const isAdmin = isAdminRequest(request) || passwordMatchesAnyAdmin(password);
 
-  // 관리자 마스터 비밀번호는 4자리 제한 없이 허용(영문·숫자 등 자유). 일반 사용자는 4자리 PIN.
+  // 관리자는 4자리 제한 없이 허용. 일반 사용자는 4자리 PIN.
   if (!isAdmin && !isValidPin(password)) {
     throw NextResponse.json({ error: "비밀번호는 숫자 4자리입니다." }, { status: 400 });
   }
@@ -35,7 +37,7 @@ async function authorize(supabase, id, password) {
   if (!isAdmin && !verifyPassword(password, row.password_hash)) {
     throw NextResponse.json({ error: "비밀번호가 일치하지 않습니다." }, { status: 403 });
   }
-  return row;
+  return { row, isAdmin };
 }
 
 // PATCH /api/reviews/:id — 비밀번호 확인 후 글/평점/이미지 수정
@@ -44,9 +46,28 @@ export async function PATCH(request, { params }) {
     const supabase = getSupabase();
     const form = await request.formData();
     const password = String(form.get("password") ?? "");
-    const row = await authorize(supabase, params.id, password);
+    const { row, isAdmin } = await authorize(supabase, params.id, password, request);
 
     const update = {};
+
+    // 사장님(관리자) 답글 — 관리자만 작성/수정/삭제 가능
+    if (form.has("adminReply")) {
+      if (!isAdmin) {
+        return NextResponse.json(
+          { error: "답글은 관리자만 작성할 수 있습니다." },
+          { status: 403 }
+        );
+      }
+      const reply = String(form.get("adminReply")).trim();
+      if (reply.length > 1000) {
+        return NextResponse.json(
+          { error: "답글은 1000자 이내로 입력해주세요." },
+          { status: 400 }
+        );
+      }
+      update.admin_reply = reply || null;
+      update.admin_reply_at = reply ? new Date().toISOString() : null;
+    }
 
     if (form.has("content")) {
       const content = String(form.get("content")).trim();
@@ -90,7 +111,9 @@ export async function PATCH(request, { params }) {
     if (Object.keys(update).length === 0) {
       return NextResponse.json({ error: "수정할 내용이 없습니다." }, { status: 400 });
     }
-    update.updated_at = new Date().toISOString();
+    // 본문/평점/사진이 실제로 바뀐 경우에만 '수정됨'으로 표시 (답글만 단 경우는 제외)
+    const contentChanged = ["content", "rating", "image_urls"].some((k) => k in update);
+    if (contentChanged) update.updated_at = new Date().toISOString();
 
     const { data, error } = await supabase
       .from("reviews")
@@ -116,7 +139,7 @@ export async function DELETE(request, { params }) {
   try {
     const supabase = getSupabase();
     const password = new URL(request.url).searchParams.get("password") ?? "";
-    const row = await authorize(supabase, params.id, password);
+    const { row } = await authorize(supabase, params.id, password, request);
 
     const { error } = await supabase.from("reviews").delete().eq("id", params.id);
     if (error) throw error;
