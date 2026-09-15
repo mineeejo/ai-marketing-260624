@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>조이감성투어 — 홈페이지 미리보기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gothic+A1:wght@400;500;700;800&display=swap" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet" />
+<style>
+  :root{
+    --accent:#0e7d6b; --accent-dark:#0a5d50; --accent-soft:#e4f4f0;
+    --ink:#1a2030; --muted:#5b6577; --line:#e9ecf2; --panel:#fff; --bg:#f7f8fb;
+    --kakao:#fee500; --kakao-ink:#3a1d1d;
+    --font-body:'Pretendard','Gothic A1',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+    --font-display:'Jua','Pretendard',sans-serif; /* 동글동글 라운드 고딕 */
+    --radius:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--font-body);background:var(--bg);color:var(--ink);line-height:1.65;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none;}
+  img{max-width:100%;display:block;}
+  .display{font-family:var(--font-display);font-weight:400;letter-spacing:.01em;}
+
+  /* ---------- Hero ---------- */
+  .hero-wrap{padding:14px;}
+  .hero{position:relative;border-radius:26px;overflow:hidden;background:#2b2724;min-height:calc(100svh - 28px);}
+  .hero>video,.hero>.hero-fallback{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .hero-fallback{background:linear-gradient(160deg,#7c4a2d,#3f2a20 55%,#241813);}
+  .scrim{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.6),rgba(0,0,0,.12) 42%,rgba(0,0,0,.15));}
+  .hero-content{position:relative;z-index:2;display:flex;flex-direction:column;min-height:calc(100svh - 28px);padding:20px;gap:22px;}
+
+  .navbar{align-self:stretch;background:rgba(255,255,255,.7);backdrop-filter:blur(10px);border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.1);padding:10px 12px 10px 18px;display:flex;align-items:center;gap:20px;position:relative;}
+  .navbar .logo{font-family:var(--font-display);font-size:20px;color:#111;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+  .navbar .logo span{color:var(--accent);}
+  .navbar nav{display:none;gap:22px;margin-left:auto;}
+  .nav-link{font-size:15px;font-weight:700;color:#2b3243;transition:color .15s;white-space:nowrap;}
+  .nav-link:hover{color:var(--accent);}
+  .book-btn{display:none;background:var(--accent);color:#fff;font-family:var(--font-display);font-size:15px;padding:9px 20px;border-radius:12px;transition:background .15s;white-space:nowrap;}
+  .book-btn:hover{background:var(--accent-dark);}
+  .hamb{display:flex;margin-left:auto;background:none;border:none;font-size:24px;line-height:1;color:#111;cursor:pointer;padding:4px 8px;}
+  .mobile-menu{display:none;flex-direction:column;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.14);margin-top:-8px;overflow:hidden;}
+  .mobile-menu.open{display:flex;}
+  .mobile-menu a{padding:14px 18px;font-weight:700;color:#2b3243;border-bottom:1px solid var(--line);}
+  .mobile-menu a:last-child{border-bottom:none;color:var(--accent-dark);}
+
+  .spacer{flex:1;min-height:1rem;}
+  .bottom-row{display:flex;flex-direction:column;gap:20px;}
+  .headline{color:#fff;font-family:var(--font-display);font-size:32px;line-height:1.32;text-shadow:0 2px 14px rgba(0,0,0,.4);}
+  .headline .accent{color:#ffe27a;}
+  .hero-card{width:100%;background:#fff;border-radius:22px;box-shadow:0 20px 50px rgba(0,0,0,.28);padding:22px;}
+  .hero-card .k-label{font-size:13px;color:var(--muted);}
+  .hero-card .k-brand{font-family:var(--font-display);font-size:24px;margin-top:2px;}
+  .hero-card .k-id{margin-top:12px;font-family:var(--font-display);font-size:20px;color:var(--accent-dark);}
+  .hero-card .k-note{font-size:13px;color:var(--muted);margin-top:10px;}
+  .hero-card .k-cta{display:inline-block;margin-top:14px;background:var(--kakao);color:var(--kakao-ink);font-weight:800;font-size:14px;padding:11px 18px;border-radius:12px;}
+
+  /* ---------- Sections ---------- */
+  .section{max-width:1120px;margin:0 auto;padding:66px 20px;}
+  .center{text-align:center;margin-bottom:38px;}
+  .eyebrow{font-size:13px;font-weight:800;color:var(--accent);letter-spacing:.18em;}
+  .h2{font-family:var(--font-display);font-size:30px;margin-top:10px;}
+  .sub{color:var(--muted);margin-top:12px;font-size:15px;}
+
+  .tour-grid{display:grid;grid-template-columns:1fr;gap:22px;}
+  .tour-card{background:var(--panel);border:1px solid #eef0f4;border-radius:var(--radius);overflow:hidden;box-shadow:0 6px 20px rgba(20,30,60,.06);display:flex;flex-direction:column;text-align:left;transition:box-shadow .2s,transform .2s;width:100%;cursor:pointer;font:inherit;color:inherit;}
+  .tour-card:hover{box-shadow:0 16px 38px rgba(20,30,60,.15);transform:translateY(-4px);}
+  .tour-thumb{position:relative;height:196px;background:var(--accent-soft);overflow:hidden;display:flex;align-items:center;justify-content:center;}
+  .tour-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .35s;font-size:0;color:transparent;}
+  .tour-card:hover .tour-thumb img{transform:scale(1.05);}
+  .ribbon{position:absolute;top:12px;left:12px;background:var(--kakao);color:var(--kakao-ink);font-size:12px;font-weight:800;padding:6px 12px;border-radius:999px;box-shadow:0 4px 12px rgba(0,0,0,.18);}
+  .tour-body{padding:20px;display:flex;flex-direction:column;flex:1;}
+  .badge{align-self:flex-start;font-family:var(--font-display);font-size:12px;color:var(--accent-dark);background:var(--accent-soft);padding:5px 12px;border-radius:999px;}
+  .badge.soon{background:#1a2030;color:#fff;letter-spacing:.05em;}
+  .tour-title{font-family:var(--font-display);font-size:19px;margin-top:12px;}
+  .tour-desc{font-size:14px;color:var(--muted);margin-top:8px;flex:1;}
+  .tour-foot{margin-top:16px;}
+  .price .was{color:var(--muted);text-decoration:line-through;font-size:15px;font-weight:600;margin-right:6px;}
+  .price .now{font-family:var(--font-display);color:var(--accent-dark);font-size:22px;}
+  .price .ktag{display:inline-block;background:var(--kakao);color:var(--kakao-ink);font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;vertical-align:middle;margin-left:6px;}
+  .price-sub{font-size:13px;color:#9aa2af;margin-top:6px;}
+  /* coming soon card */
+  .tour-card.soon-card{cursor:default;border-style:dashed;border-color:#c9d0de;background:linear-gradient(180deg,#fbfcff,#f2f5fb);box-shadow:none;}
+  .tour-card.soon-card:hover{transform:translateY(-4px);box-shadow:0 6px 20px rgba(20,30,60,.06);}
+  .soon-thumb{background:linear-gradient(135deg,#eef1f7,#dfe4ee);font-size:60px;}
+  .soon-lock{font-family:var(--font-display);color:var(--muted);font-size:15px;margin-top:16px;}
+
+  /* Why */
+  .why{background:#f2f4f1;border-top:1px solid #e8ebe6;border-bottom:1px solid #e8ebe6;}
+  .why-grid{display:grid;grid-template-columns:1fr;gap:22px;}
+  .why-card{background:#fff;border:1px solid #eef0f4;border-radius:var(--radius);padding:26px;box-shadow:0 6px 20px rgba(20,30,60,.05);}
+  .why-icon{font-size:38px;}
+  .why-title{font-family:var(--font-display);font-size:19px;margin-top:14px;}
+  .why-desc{font-size:14px;color:var(--muted);margin-top:8px;}
+
+  /* Reviews */
+  .reviews{background:var(--bg);}
+  .rv-note{background:var(--accent-soft);border:1px dashed var(--accent);color:var(--accent-dark);border-radius:14px;padding:12px 16px;font-size:13px;text-align:center;margin-bottom:24px;}
+  .review-list{display:flex;flex-direction:column;gap:16px;max-width:760px;margin:0 auto;}
+  .review-item{background:#fff;border:1px solid #eef0f4;border-radius:var(--radius);padding:20px;box-shadow:0 6px 20px rgba(20,30,60,.05);}
+  .review-item .top{display:flex;justify-content:space-between;align-items:baseline;}
+  .review-item .who{font-family:var(--font-display);font-size:16px;}
+  .review-item .when{color:#9aa2af;font-size:13px;}
+  .stars{color:#f5a524;font-size:15px;margin:4px 0 8px;}
+  .review-item .content{white-space:pre-wrap;font-size:14.5px;}
+  .review-item .photo{margin-top:12px;border-radius:12px;max-height:220px;width:auto;border:1px solid var(--line);}
+  .admin-reply{margin-top:14px;background:var(--accent-soft);border-left:3px solid var(--accent);border-radius:10px;padding:12px 16px;}
+  .admin-reply .ar-head{font-weight:700;font-size:13px;color:var(--accent-dark);margin-bottom:4px;}
+  .admin-reply .ar-body{margin:0;font-size:14px;}
+  .rv-write{display:block;max-width:760px;margin:22px auto 0;text-align:center;background:var(--accent);color:#fff;font-family:var(--font-display);font-size:16px;padding:14px;border-radius:14px;border:none;cursor:pointer;width:100%;}
+  .rv-write:hover{background:var(--accent-dark);}
+
+  /* Book */
+  .book{background:#f2f4f1;border-top:1px solid #e8ebe6;}
+  .book-card{max-width:560px;margin:0 auto;background:#fff;border:1px solid #eef0f4;border-radius:var(--radius);padding:28px;text-align:center;box-shadow:0 6px 20px rgba(20,30,60,.06);}
+  .book-card .ico{font-size:30px;}
+  .book-card .b-id{font-family:var(--font-display);font-size:30px;color:var(--accent-dark);margin-top:6px;}
+  .reason-grid{display:grid;grid-template-columns:1fr;gap:16px;max-width:760px;margin:28px auto 0;}
+  .reason-card{background:#fff;border:1px solid #eef0f4;border-radius:14px;padding:20px;text-align:center;}
+  .reason-card .ri{font-size:28px;}
+  .reason-card h4{font-family:var(--font-display);font-size:16px;margin:8px 0 6px;font-weight:400;}
+  .reason-card p{font-size:13px;color:var(--muted);}
+  .discount-list{max-width:560px;margin:24px auto 0;display:flex;flex-direction:column;gap:12px;}
+  .drow{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:#fff;border:1px solid #eef0f4;border-radius:14px;padding:16px 18px;box-shadow:0 6px 20px rgba(20,30,60,.05);}
+  .drow .dt{font-family:var(--font-display);font-size:15px;}
+  .drow .dp{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
+  .drow .dp s{color:#9aa2af;font-size:13px;}
+  .drow .dp strong{font-family:var(--font-display);color:var(--accent-dark);font-size:19px;}
+  .drow .dp em{font-style:normal;background:var(--kakao);color:var(--kakao-ink);font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px;}
+
+  /* Footer */
+  .footer{background:#0e1422;color:#c4cbd8;}
+  .footer-inner{max-width:1120px;margin:0 auto;padding:44px 20px;display:flex;flex-direction:column;gap:20px;justify-content:space-between;}
+  .footer .brand{font-family:var(--font-display);color:#fff;font-size:20px;}
+  .footer p{font-size:14px;margin-top:4px;}
+  .footer .fnav{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap;}
+  .footer .fnav a:hover{color:#fff;}
+
+  /* Modal */
+  .modal{display:none;position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.55);overflow-y:auto;padding:0 12px;}
+  .modal.open{display:block;}
+  .modal-panel{max-width:760px;margin:24px auto;background:#fff;border-radius:22px;overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.42);}
+  .modal-hero{position:relative;background:var(--accent-soft);}
+  .modal-hero img{width:100%;height:260px;object-fit:cover;font-size:0;color:transparent;}
+  .modal-close{position:absolute;top:12px;right:12px;width:38px;height:38px;border:none;border-radius:50%;background:rgba(255,255,255,.94);font-size:16px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2);}
+  .modal-body{padding:28px;}
+  .modal-body h2{font-family:var(--font-display);font-size:25px;margin-top:12px;}
+  .kbanner{background:#fff8c2;border:1px solid var(--kakao);border-radius:12px;padding:13px 16px;margin-top:16px;font-size:14px;line-height:1.6;}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
+  .chip{font-size:14px;font-weight:600;background:#f3f4f6;border-radius:999px;padding:6px 14px;}
+  .chip s{color:#9aa2af;font-weight:500;}
+  .h3{font-family:var(--font-display);font-size:18px;margin:26px 0 10px;}
+  ul.disc{padding-left:20px;}
+  ul.disc li{font-size:14px;color:#374151;margin-bottom:6px;}
+  .itin li{background:#f7f8fa;border-radius:10px;padding:12px 16px;font-size:14px;margin-bottom:8px;list-style:none;}
+  .itin li strong{color:var(--accent-dark);font-family:var(--font-display);}
+  .incl-grid{display:grid;grid-template-columns:1fr;gap:16px;}
+  .incl-box{border:1px solid #eef0f4;border-radius:12px;padding:16px;}
+  .incl-box .yes{color:var(--accent-dark);font-family:var(--font-display);margin-bottom:8px;}
+  .incl-box .no{color:#c0563b;font-family:var(--font-display);margin-bottom:8px;}
+  .breakdown{background:#fff8c2;border-radius:12px;padding:12px 16px;margin-top:14px;list-style:none;font-size:14px;}
+  .breakdown li{margin-bottom:4px;}
+  .notes{background:var(--accent-soft);border-radius:12px;padding:16px 16px 16px 34px;}
+  .notes li{color:var(--muted);}
+  .modal-actions{display:flex;gap:12px;margin-top:28px;}
+  .btn{flex:1;text-align:center;background:var(--accent);color:#fff;font-family:var(--font-display);padding:13px;border-radius:14px;border:none;cursor:pointer;font-size:15px;}
+  .btn:hover{background:var(--accent-dark);}
+  .btn-ghost{flex:none;padding:13px 20px;background:#fff;border:1px solid var(--line);border-radius:14px;font-weight:700;cursor:pointer;}
+
+  @media(min-width:640px){
+    .navbar nav{display:flex;}
+    .book-btn{display:inline-block;}
+    .hamb{display:none;}
+    .headline{font-size:40px;}
+    .tour-grid{grid-template-columns:1fr 1fr;}
+    .footer-inner{flex-direction:row;}
+    .foot-right{text-align:right;}
+    .incl-grid{grid-template-columns:1fr 1fr;}
+    .reason-grid{grid-template-columns:repeat(3,1fr);}
+  }
+  @media(min-width:768px){ .why-grid{grid-template-columns:repeat(3,1fr);} }
+  @media(min-width:1024px){
+    .hero-wrap{padding:22px;}
+    .hero,.hero-content{min-height:calc(100svh - 44px);}
+    .bottom-row{flex-direction:row;align-items:flex-end;justify-content:space-between;}
+    .headline{font-size:50px;max-width:640px;}
+    .hero-card{width:min(430px,42%);}
+    .tour-grid{grid-template-columns:repeat(3,1fr);}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== Hero ===== -->
+<div class="hero-wrap">
+  <div class="hero">
+    <div class="hero-fallback"></div>
+    <video autoplay muted loop playsinline
+      src="https://d8j0ntlcm91z4.cloudfront.net/user_3CkUAX5vl7hsRPpzsmLNJVSyYqp/hf_20260626_041746_4ec96dc5-b701-4029-9e9f-adc136e500a5.mp4"></video>
+    <div class="scrim"></div>
+    <div class="hero-content">
+      <div>
+        <div class="navbar">
+          <a href="#top" class="logo">🏜️ 조이감성<span>투어</span></a>
+          <nav>
+            <a class="nav-link" href="#tours">투어 상품</a>
+            <a class="nav-link" href="#why">왜 조이감성투어인가요?</a>
+            <a class="nav-link" href="#reviews">고객 후기</a>
+          </nav>
+          <a class="book-btn" href="#book">예약·문의</a>
+          <button class="hamb" aria-label="메뉴" onclick="toggleMenu()">☰</button>
+        </div>
+        <div id="mobileMenu" class="mobile-menu">
+          <a href="#tours" onclick="toggleMenu()">투어 상품</a>
+          <a href="#why" onclick="toggleMenu()">왜 조이감성투어인가요?</a>
+          <a href="#reviews" onclick="toggleMenu()">고객 후기</a>
+          <a href="#book" onclick="toggleMenu()">예약·문의</a>
+        </div>
+      </div>
+      <div class="spacer"></div>
+      <div class="bottom-row">
+        <p class="headline">그랜드캐년의 경이로움을<br><span class="accent">조이감성투어</span>와 함께 만나보세요</p>
+        <div class="hero-card">
+          <div class="k-label">💬 카카오톡 문의 / 예약</div>
+          <div class="k-brand">조이감성투어</div>
+          <div class="k-id">Kakao ID : 2050hj</div>
+          <div class="k-note">카카오톡에서 위 ID로 검색해 문의·예약해주세요.<br>카톡 직접 예약 시 <b>투어비 즉시 할인</b> 혜택!</div>
+          <a class="k-cta" href="#book">예약·문의 자세히 보기 →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Tours ===== -->
+<section id="tours" class="section">
+  <div class="center">
+    <div class="eyebrow">JOY GAMSUNG TOUR</div>
+    <div class="h2">그랜드캐년 투어 상품</div>
+    <div class="sub">라스베가스 출발 · 카드를 누르면 상세가 열려요 · 카톡(ID: 2050hj) 직접 예약 시 할인</div>
+  </div>
+  <div id="tourGrid" class="tour-grid"></div>
+  <p class="sub" style="text-align:center;margin-top:26px;">더 많은 코스가 곧 공개됩니다. 오픈 소식은 카톡으로 미리 알림 신청하세요!</p>
+</section>
+
+<!-- ===== Why ===== -->
+<section id="why" class="why">
+  <div class="section">
+    <div class="center">
+      <div class="eyebrow">WHY JOY GAMSUNG</div>
+      <div class="h2">왜 조이감성투어인가요?</div>
+      <div class="sub">편안함, 감동, 그리고 인생샷까지 — 다녀온 분들이 추천하는 이유</div>
+    </div>
+    <div id="whyGrid" class="why-grid"></div>
+  </div>
+</section>
+
+<!-- ===== Reviews ===== -->
+<section id="reviews" class="reviews">
+  <div class="section">
+    <div class="center">
+      <div class="eyebrow">REVIEWS</div>
+      <div class="h2">고객 후기</div>
+      <div class="sub">조이감성투어와 함께한 여행자들의 생생한 후기입니다.</div>
+    </div>
+    <div class="rv-note">✍️ 실제 사이트에서는 누구나 사진과 함께 후기를 남길 수 있고, 작성 시 등록한 4자리 비밀번호로 본인 글을 수정·삭제할 수 있어요. (아래는 예시 후기입니다)</div>
+    <div id="reviewList" class="review-list"></div>
+    <button class="rv-write" onclick="alert('미리보기에서는 후기가 저장되지 않아요. \n Vercel 배포 후 실제로 작동합니다! 😊')">✍️ 리뷰 쓰기</button>
+  </div>
+</section>
+
+<!-- ===== Book ===== -->
+<section id="book" class="book">
+  <div class="section">
+    <div class="center">
+      <div class="eyebrow">BOOKING</div>
+      <div class="h2">예약 · 문의</div>
+      <div class="sub">예약과 할인 문의는 카카오톡으로 편하게 연락주세요.</div>
+    </div>
+    <div class="book-card">
+      <div class="ico">💬</div>
+      <div style="font-family:var(--font-display);font-size:18px;margin-top:8px;">카카오톡 문의 / 예약</div>
+      <div class="k-label" style="color:var(--muted);font-size:14px;margin-top:6px;">조이감성투어 카카오톡 ID</div>
+      <div class="b-id">2050hj</div>
+      <div class="sub" style="font-size:14px;">카카오톡에서 위 ID로 검색해 문의·예약해주세요. 단독투어도 가능합니다.</div>
+    </div>
+
+    <h3 class="h2" style="text-align:center;font-size:22px;margin-top:44px;">카카오톡으로 직접 예약해야 하는 이유 📢</h3>
+    <div id="reasonGrid" class="reason-grid"></div>
+
+    <h3 class="h2" style="text-align:center;font-size:22px;margin-top:44px;">카톡 예약 시 할인가 💚</h3>
+    <div id="discountList" class="discount-list"></div>
+  </div>
+</section>
+
+<!-- ===== Footer ===== -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div>
+      <div class="brand">🏜️ 조이감성투어</div>
+      <p>라스베가스 출발 그랜드캐년 여행 전문</p>
+    </div>
+    <div class="foot-right">
+      <p>💬 카카오톡 ID: <span style="color:#fff;font-weight:700;">2050hj</span> (할인·예약 문의)</p>
+      <p>라스베가스 스트립 내 호텔 픽업</p>
+      <div class="fnav" style="justify-content:flex-start;">
+        <a href="#tours">투어 상품</a><a href="#why">왜 조이감성투어인가요?</a><a href="#reviews">고객 후기</a><a href="#book">예약·문의</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ===== Modal ===== -->
+<div id="modal" class="modal" onclick="if(event.target===this)closeTour()">
+  <div class="modal-panel"><div id="modalBody"></div></div>
+</div>
+
+<script>
+const IMG="https://d8j0ntlcm91z4.cloudfront.net/user_3CkUAX5vl7hsRPpzsmLNJVSyYqp/";
+const KID="2050hj";
+
+const TOURS=[
+  {badge:"당일",title:"그랜드캐년 당일 투어",price:130,priceKakao:115,discount:15,
+   duration:"당일 (새벽 출발)",region:"라스베가스 출발",
+   img:IMG+"hf_20260626_053223_23dff708-92fa-4a83-a907-239321237c24.png",
+   desc:"라스베가스에서 새벽 출발, 그랜드캐년(이스트림·사우스림)·엔텔롭캐년·홀슈밴드·파웰호수까지 하루에 도는 인기 코스.",
+   highlights:["그랜드캐년 이스트림 + 사우스림","엔텔롭캐년 · 홀슈밴드 · 파웰호수 · 웰컴사인","새벽 별구경 · 인생샷 사진 원본 제공 (카톡 단톡방)","호텔 픽업·드랍 + 아침식사(현지음식) 포함"],
+   itinerary:[["새벽","라스베가스 스트립 내 호텔 픽업 → 웰컴사인 → 별구경"],["오전","아침식사(현지음식·포함) → 홀슈밴드 → 그랜드캐년 이스트림"],["낮","그랜드캐년 사우스림 → 엔텔롭캐년 → 점심식사(한·중·일식 자유선택)"],["오후","파웰호수 → 호텔 드랍 (7:00pm~8:00pm 목표)"]],
+   included:["차량 유지비·유류비","사업자용 차량보험","생수 제공","인생샷 사진 원본 제공 (카톡 단톡방)","픽업 및 드랍 차량 서비스","6세 이하 카시트 준비","아침식사 (현지음식)"],
+   notIncluded:["그랜드캐년 입장료 1인 $10","Non-Resident Fee 1인 $70","CUA 퍼밋 & 그랜드캐년 상해보험 1인 $15","홀슈밴드 입장료 1인 $10","엔텔롭캐년 입장료 1인 $80 (0~3세 무료)","가이드 팁 (2인 운전 1인당 $45 / 1인 운전 1인당 $25)","개인 여행자 보험","점심 & 저녁 식사"],
+   breakdown:["2인 가이드 운전 기준 총 예상 금액: $230 + @ (식사 별도)","1인 가이드 운전 기준 총 예상 금액: $210 + @ (식사 별도)"],
+   notes:["투어 출발은 예약하신 날짜의 새벽(00:00am~00:40am)입니다.","픽업은 라스베가스 스트립 내 호텔에서만 가능합니다. (호텔 이름·주소 사전 전달 필요)","캐리어는 차량에 실을 수 없어, 픽업 전 호텔 로비에 개인적으로 맡기셔야 합니다. (소정의 팁 필요)","로워 엔텔롭캐년 입장료는 0~3세 무료입니다. (출발 4일 전까지 알려주셔야 해요)","엔텔롭캐년 투어 후 나바호 가이드님 팁은 자율 지불입니다.","국립공원·투어 장소 입장료는 현지 가격 변동 시 변동가가 적용됩니다. 로워 엔텔롭캐년 예약 불가 시 X엔텔롭캐년으로 입장합니다.","투어 복귀는 7:00pm~8:00pm 목표입니다. (호텔 위치·교통량·계절에 따라 변동 가능)","경우에 따라 가이드 1인 운전일 수 있습니다. (이 경우 가이드 팁 $20 할인)","차량: 4~6인은 7인승 미니밴 / 7인 이상은 15인승 차량.","예약금 환불: 출발 6일 전 전액 / 5일~72시간 전 50% / 72시간(3일) 이내 환불 불가 (천재지변 시 100% 환불)."]},
+
+  {badge:"1박 2일",title:"그랜드캐년 1박2일 6대캐년 투어",price:244,priceKakao:220,discount:24,
+   duration:"1박 2일",region:"라스베가스 출발",
+   img:IMG+"hf_20260626_053224_8317b01e-5154-4690-ab86-e2be5faf70d9.png",
+   desc:"그랜드캐년은 물론 자이언·브라이스·레드캐년까지! 미국 서부 6대 캐년을 1박 2일에 정복하는 풀코스.",
+   highlights:["자이언 · 브라이스 · 레드캐년","그랜드캐년 · 엔텔롭캐년 · 홀슈밴드 · 파웰호수","저녁식사 메뉴 선택 (한식 / 텍사스BBQ / 중식뷔페)","호텔·하우스 2인 1실 숙박 · 사진 원본 제공 포함"],
+   itinerary:[["DAY 1","호텔 픽업 → 자이언캐년 → 중식(서브웨이·본인부담) → 레드캐년 → 홀슈밴드 → 파웰호수 → 브라이스캐년 → 저녁식사(한식·텍사스BBQ·중식뷔페 선택·본인부담) → 별구경 → 호텔/하우스 2인 1실 숙박"],["DAY 2","조식(호텔 조식 or 맥도날드·본인부담) → 엔텔롭캐년 → 그랜드캐년 → 점심식사(공원 내 또는 도착 전후·본인부담) → 라스베가스 도착"]],
+   included:["차량 유지비·유류비","사업자용 차량보험","생수 제공","인생샷 사진 원본 제공 (카톡 단톡방)","픽업 및 드랍 차량 서비스","6세 이하 카시트 준비","투어 중 하우스·호텔 사용료"],
+   notIncluded:["그랜드·자이언·브라이스캐년 입장료 1인 $30","Non-Resident Fee 1인 $83 (미국 시민권자/영주권자/거주자 해당 X)","CUA 퍼밋 & 그랜드캐년 상해보험 1인 $15","홀슈밴드 입장료 1인 $5","엔텔롭캐년 입장료 1인 $80 (0~3세 무료)","가이드 팁 1인당 $40","개인 여행자 보험","투어 중 모든 식사"],
+   breakdown:["입장료·팁 포함 총 예상 금액: $253 + @ (식사 별도)"],
+   notes:["투어 일정은 예상치 못한 문제로 변경될 수 있습니다.","투어 출발은 예약하신 날짜의 새벽(05:00am~06:00am)입니다.","픽업은 라스베가스 스트립 내 호텔에서만 가능합니다. (호텔 이름·주소 사전 전달 필요)","캐리어는 차량에 실을 수 없어, 픽업 전 호텔 로비에 개인적으로 맡기셔야 합니다. (소정의 팁 필요)","로워 엔텔롭캐년 입장료는 0~3세 무료입니다. (출발 4일 전까지 알려주셔야 해요)","엔텔롭캐년 투어 후 나바호 가이드님 팁은 자율 지불입니다.","국립공원·투어 장소 입장료는 현지 가격 변동 시 변동가가 적용됩니다. 로워 엔텔롭캐년 예약 불가 시 X엔텔롭캐년으로 입장합니다.","투어 복귀는 7:00pm~8:00pm 목표입니다. (호텔 위치·교통량·계절에 따라 변동 가능)","차량: 4~6인은 7인승 미니밴 / 7인 이상은 15인승 차량.","예약금 환불: 출발 6일 전 전액 / 5일~72시간 전 50% / 72시간(3일) 이내 환불 불가 (천재지변 시 100% 환불)."]},
+];
+
+const SOON=[
+  {emoji:"🤫",title:"세 번째 시크릿 코스",summary:"아직은 비밀이에요. 조이감성투어가 엄청난 코스를 가지고 곧 돌아옵니다. 상상 그 이상, 기대해주세요! 👀"},
+  {emoji:"✨",title:"네 번째 시크릿 코스",summary:"지금까지 없던 인생 코스를 준비하고 있어요. 곧 공개될 새로운 감성, 조금만 기다려주세요! 💚"},
+  {emoji:"🚀",title:"다섯 번째 시크릿 코스",summary:"곧 공개! 카톡(ID: 2050hj) 친구추가하고 오픈 소식을 가장 먼저 받아보세요. 🎉"},
+];
+
+const usd=n=>"$"+n.toLocaleString("en-US");
+
+// 투어 카드 렌더
+let html=TOURS.map((t,i)=>`
+  <button class="tour-card" onclick="openTour(${i})">
+    <div class="tour-thumb">
+      <img src="${t.img}" alt="${t.title}">
+      <span class="ribbon">카톡 예약 시 $${t.discount} 할인</span>
+    </div>
+    <div class="tour-body">
+      <span class="badge">${t.badge}</span>
+      <div class="tour-title">${t.title}</div>
+      <div class="tour-desc">${t.desc}</div>
+      <div class="tour-foot">
+        <div class="price"><span class="was">${usd(t.price)}</span><span class="now">${usd(t.priceKakao)}</span><span class="ktag">카톡 예약 시</span></div>
+        <div class="price-sub">${t.duration} · ${t.region}</div>
+      </div>
+    </div>
+  </button>`).join('');
+html+=SOON.map(s=>`
+  <div class="tour-card soon-card">
+    <div class="tour-thumb soon-thumb">${s.emoji}</div>
+    <div class="tour-body">
+      <span class="badge soon">COMING SOON</span>
+      <div class="tour-title">${s.title}</div>
+      <div class="tour-desc">${s.summary}</div>
+      <div class="soon-lock">🔒 곧 공개</div>
+    </div>
+  </div>`).join('');
+document.getElementById('tourGrid').innerHTML=html;
+
+const li=a=>a.map(x=>`<li>${x}</li>`).join('');
+function openTour(i){
+  const t=TOURS[i];
+  document.getElementById('modalBody').innerHTML=`
+    <div class="modal-hero">
+      <img src="${t.img}" alt="${t.title}">
+      <button class="modal-close" onclick="closeTour()">✕</button>
+    </div>
+    <div class="modal-body">
+      <span class="badge">${t.badge}</span>
+      <h2>${t.title}</h2>
+      <p style="color:var(--muted);margin-top:8px;">${t.desc}</p>
+      <div class="chips">
+        <span class="chip">📍 ${t.region}</span>
+        <span class="chip">🗓️ ${t.duration}</span>
+        <span class="chip">💰 <s>${usd(t.price)}</s> <strong>${usd(t.priceKakao)}</strong> 카톡 예약 시</span>
+      </div>
+      <div class="kbanner">💬 <b>카톡(ID: ${KID})</b> 직접 예약 시 1인당 <b>$${t.discount} 즉시 할인</b> — ${usd(t.price)} → <b>${usd(t.priceKakao)}</b></div>
+      <div class="h3">여행 하이라이트</div><ul class="disc">${li(t.highlights)}</ul>
+      <div class="h3">상세 일정</div><ul class="itin">${t.itinerary.map(d=>`<li><strong>${d[0]}</strong> — ${d[1]}</li>`).join('')}</ul>
+      <div class="h3">포함 / 불포함</div>
+      <div class="incl-grid">
+        <div class="incl-box"><div class="yes">포함</div><ul class="disc">${li(t.included)}</ul></div>
+        <div class="incl-box"><div class="no">불포함</div><ul class="disc">${li(t.notIncluded)}</ul></div>
+      </div>
+      <ul class="breakdown">${t.breakdown.map(b=>`<li>💵 ${b}</li>`).join('')}</ul>
+      <div class="h3">예약 전 확인사항</div><ul class="disc notes">${li(t.notes)}</ul>
+      <div class="modal-actions">
+        <a class="btn" href="#book" onclick="closeTour()">카톡으로 예약·문의 (${KID})</a>
+        <button class="btn-ghost" onclick="closeTour()">닫기</button>
+      </div>
+    </div>`;
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow='hidden';
+  document.getElementById('modal').scrollTop=0;
+}
+function closeTour(){document.getElementById('modal').classList.remove('open');document.body.style.overflow='';}
+function toggleMenu(){document.getElementById('mobileMenu').classList.toggle('open');}
+
+// Why
+const WHY=[
+  {icon:"🚐",title:"편안한 감성 여행",desc:"쾌적하고 안락한 최신 차량으로 이동. 장시간 이동도 창밖 풍경을 즐기며 힐링하는 시간으로 채워드려요."},
+  {icon:"🎙️",title:"베테랑 가이드의 스토리텔링",desc:"단순한 설명이 아니라 그랜드캐년에 얽힌 역사와 숨은 이야기까지. 마치 한 편의 영화처럼 빠져들게 됩니다."},
+  {icon:"📸",title:"알찬 코스 · 인생샷 명당",desc:"오랜 경험과 노하우로 핵심만 콕콕. 현지 가이드만 아는 '인생샷 명당'까지 꼼꼼하게 안내해드려요."},
+];
+document.getElementById('whyGrid').innerHTML=WHY.map(w=>`
+  <div class="why-card"><div class="why-icon">${w.icon}</div><div class="why-title">${w.title}</div><div class="why-desc">${w.desc}</div></div>`).join('');
+
+// Reviews (예시)
+const stars=n=>"★".repeat(n)+"☆".repeat(5-n);
+const REVIEWS=[
+  {name:"김지현",rating:5,when:"2026년 6월 12일",content:"새벽부터 별구경으로 시작해서 그랜드캐년 사우스림까지! 가이드님이 인생샷 명당을 다 알려주셔서 사진 제대로 건졌어요. 카톡 단톡방으로 원본까지 보내주시는 것도 최고 👍",photo:IMG+"hf_20260626_053223_23dff708-92fa-4a83-a907-239321237c24.png",reply:"지현님, 소중한 후기 감사합니다! 다음에도 인생샷 가득한 여행으로 모실게요. 조이감성투어 드림 🙏"},
+  {name:"이준호",rating:5,when:"2026년 5월 30일",content:"1박2일 6대캐년 다녀왔는데 진짜 알차요. 자이언·브라이스까지 도니까 하루로는 절대 못 볼 걸 다 봤네요. 숙소도 깔끔했습니다.",photo:null},
+  {name:"박서연",rating:4,when:"2026년 5월 18일",content:"엔텔롭캐년 빛기둥 보고 감탄… 일정이 조금 빡세긴 한데 그만큼 많이 봐서 만족해요. 카톡으로 예약하니 할인도 받고 좋았습니다!",photo:null},
+];
+document.getElementById('reviewList').innerHTML=REVIEWS.map(r=>`
+  <div class="review-item">
+    <div class="top"><span class="who">${r.name}</span><span class="when">${r.when}</span></div>
+    <div class="stars">${stars(r.rating)}</div>
+    <p class="content">${r.content}</p>
+    ${r.photo?`<img class="photo" src="${r.photo}" alt="후기 사진">`:""}
+    ${r.reply?`<div class="admin-reply"><div class="ar-head">🧑‍💼 사장님 답글</div><p class="ar-body">${r.reply}</p></div>`:""}
+  </div>`).join('');
+
+// Book — reasons & discount
+const REASONS=[
+  {i:"🛡️",t:"자체 환불규정 적용",d:"타 중계 사이트는 출발 30일 전까지만 전액 환불. 카톡 직접 예약은 자체 환불규정이 적용돼요."},
+  {i:"🕐",t:"한국 상담사 24시간 상담",d:"조이감성투어 한국 예약 상담사와 24시간 편하게 상담하실 수 있습니다."},
+  {i:"💸",t:"투어비 즉시 할인 혜택",d:"카톡 직접 예약 시 상품별로 1인당 최대 $24까지 즉시 할인해 드려요!"},
+];
+document.getElementById('reasonGrid').innerHTML=REASONS.map(r=>`
+  <div class="reason-card"><div class="ri">${r.i}</div><h4>${r.t}</h4><p>${r.d}</p></div>`).join('');
+document.getElementById('discountList').innerHTML=TOURS.map((t,i)=>`
+  <button class="drow" style="border:1px solid #eef0f4;cursor:pointer;font:inherit;color:inherit;" onclick="openTour(${i})">
+    <span class="dt">${t.title}</span>
+    <span class="dp"><s>${usd(t.price)}</s><strong>${usd(t.priceKakao)}</strong><em>1인당 $${t.discount} 할인</em></span>
+  </button>`).join('');
+</script>
+</body>
+</html>
