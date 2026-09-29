@@ -70,8 +70,31 @@ function ReviewItem({ review, isAdmin, onUpdated, onDeleted }) {
   const [err, setErr] = useState(null);
   const [keptUrls, setKeptUrls] = useState([]); // 유지할 기존 사진
   const [editPreviews, setEditPreviews] = useState([]); // 새로 추가한 사진 [{file,url}]
+  const [editPassword, setEditPassword] = useState(""); // 진입 시 확인된 비밀번호
 
-  function openEdit() {
+  async function openEdit() {
+    let pw = "";
+    if (!isAdmin) {
+      // 수정 화면에 들어가기 전에 비밀번호부터 확인 — 틀리면 진입 자체를 막음
+      pw = window.prompt("후기를 수정하려면 비밀번호(4자리)를 입력하세요.") ?? "";
+      if (pw === "") return; // 취소하거나 빈값
+      try {
+        const res = await fetch(`/api/reviews/${review.id}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: pw }),
+        });
+        const data = await res.json().catch(() => ({ error: "확인에 실패했습니다." }));
+        if (!res.ok) {
+          window.alert(data.error || "비밀번호가 일치하지 않습니다.");
+          return; // 틀리면 수정 화면 안 열림
+        }
+      } catch {
+        window.alert("확인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+        return;
+      }
+    }
+    setEditPassword(pw);
     setKeptUrls(Array.isArray(review.image_urls) ? review.image_urls : []);
     setEditPreviews([]);
     setErr(null);
@@ -80,6 +103,7 @@ function ReviewItem({ review, isAdmin, onUpdated, onDeleted }) {
   function closeEdit() {
     editPreviews.forEach((p) => URL.revokeObjectURL(p.url));
     setEditPreviews([]);
+    setEditPassword("");
     setEditing(false);
   }
   function addEditFiles(e) {
@@ -112,7 +136,6 @@ function ReviewItem({ review, isAdmin, onUpdated, onDeleted }) {
     setBusy(true);
     try {
       const fd = new FormData(e.currentTarget);
-      const password = String(fd.get("password") || "");
       const content = String(fd.get("content") || "");
       const newUrls = await uploadImages(editPreviews.map((p) => p.file));
       const imageUrls = [...keptUrls, ...newUrls];
@@ -120,7 +143,7 @@ function ReviewItem({ review, isAdmin, onUpdated, onDeleted }) {
       const res = await fetch(`/api/reviews/${review.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password, content, imageUrls }),
+        body: JSON.stringify({ password: editPassword, content, imageUrls }),
       });
       const data = await res.json().catch(() => ({ error: "수정에 실패했습니다." }));
       if (!res.ok) throw new Error(data.error);
@@ -205,18 +228,12 @@ function ReviewItem({ review, isAdmin, onUpdated, onDeleted }) {
     return (
       <form className="review-item" onSubmit={handleEdit}>
         {err && <p className="form-msg error">{err}</p>}
-        {!isAdmin && (
-          <div className="field">
-            <label>비밀번호 (작성 시 입력한 4자리 · 관리자는 관리자 비밀번호)</label>
-            <input name="password" maxLength={32} required placeholder="****" />
-          </div>
-        )}
         <div className="field">
           <label>후기 내용</label>
           <textarea name="content" maxLength={2000} required defaultValue={review.content} />
         </div>
         <div className="field">
-          <label>사진 (최대 {MAX_IMAGES}장 · 사진 위 ✕ 로 삭제)</label>
+          <label>사진 (최대 {MAX_IMAGES}장)</label>
           <input
             id={`edit-image-${review.id}`}
             type="file"

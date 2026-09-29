@@ -127,6 +127,23 @@ export async function PATCH(request, { params }) {
   }
 }
 
+// POST /api/reviews/:id — 비밀번호만 확인 (수정 화면 진입 전 검증용). 변경 없음.
+export async function POST(request, { params }) {
+  try {
+    const supabase = getSupabase();
+    const body = await request.json().catch(() => ({}));
+    const password = String(body.password ?? "");
+    await authorize(supabase, params.id, password, request); // 틀리면 여기서 throw
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    if (err instanceof NextResponse || err?.status) return err;
+    return NextResponse.json(
+      { error: err.message ?? "확인에 실패했습니다." },
+      { status: 500 }
+    );
+  }
+}
+
 // DELETE /api/reviews/:id — 비밀번호 확인 후 삭제 (?password=1234) / 관리자는 쿠키로
 export async function DELETE(request, { params }) {
   try {
