@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { compressImage } from "../../../lib/compressImage";
 
 // 배열 ↔ 텍스트(줄바꿈) 변환 헬퍼
 const toLines = (arr) => (Array.isArray(arr) ? arr.join("\n") : "");
@@ -29,6 +30,7 @@ export default function AdminToursPage() {
   const [tours, setTours] = useState([]);
   const [source, setSource] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [reordering, setReordering] = useState(false);
   const [msg, setMsg] = useState(null);
 
   async function loadAll() {
@@ -82,6 +84,37 @@ export default function AdminToursPage() {
     loadAll();
   }
 
+  // ▲▼ 순서 이동: 이웃과 자리를 바꾸고, 순서를 0,1,2…로 정리해 저장.
+  async function move(i, dir) {
+    const j = i + dir;
+    if (j < 0 || j >= tours.length || reordering) return;
+    const arr = [...tours];
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+    setTours(arr); // 화면 먼저 반영(부드럽게)
+    setReordering(true);
+    setMsg(null);
+    try {
+      await Promise.all(
+        arr.map((t, idx) =>
+          t.sort !== idx
+            ? fetch(`/api/tours/${t.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ sort: idx }),
+              })
+            : null
+        )
+      );
+      await loadAll();
+      setMsg({ type: "success", text: "순서가 저장됐어요. 홈·투어 상품 페이지에 바로 반영됩니다. ✅" });
+    } catch {
+      setMsg({ type: "error", text: "순서 변경에 실패했어요. 다시 시도해주세요." });
+      await loadAll();
+    } finally {
+      setReordering(false);
+    }
+  }
+
   if (loading) return <p className="empty">불러오는 중...</p>;
 
   if (!me?.loggedIn) {
@@ -98,7 +131,7 @@ export default function AdminToursPage() {
     <article>
       <h1 className="section-title">상품 관리</h1>
       <p className="section-sub">
-        로그인: <b>{me.username}</b> · 여기서 수정하면 <Link href="/tours" style={{ color: "var(--accent-dark)", fontWeight: 700 }}>투어 상품</Link> 페이지에 바로 반영됩니다.
+        로그인: <b>{me.username}</b> · 여기서 수정하면 <Link href="/tours" style={{ color: "var(--accent-dark)", fontWeight: 700 }}>투어 상품</Link> 페이지와 홈에 바로 반영됩니다.
       </p>
 
       {msg && <p className={`form-msg ${msg.type}`}>{msg.text}</p>}
@@ -113,11 +146,23 @@ export default function AdminToursPage() {
         </div>
       ) : (
         <>
+          <div className="admin-hint">
+            💡 카드의 <b>▲▼</b> 버튼으로 노출 순서를 바꿀 수 있어요. 위에 있을수록 홈·상품 페이지에서 먼저 보입니다.
+          </div>
           <div style={{ margin: "8px 0 20px" }}>
             <button className="btn btn-ghost" onClick={handleAdd}>＋ 새 상품 추가</button>
           </div>
-          {tours.map((t) => (
-            <TourEditor key={t.id} tour={t} onChanged={loadAll} setMsg={setMsg} />
+          {tours.map((t, i) => (
+            <TourEditor
+              key={t.id}
+              tour={t}
+              index={i}
+              total={tours.length}
+              reordering={reordering}
+              onMove={move}
+              onChanged={loadAll}
+              setMsg={setMsg}
+            />
           ))}
         </>
       )}
@@ -125,9 +170,10 @@ export default function AdminToursPage() {
   );
 }
 
-function TourEditor({ tour, onChanged, setMsg }) {
+function TourEditor({ tour, index, total, reordering, onMove, onChanged, setMsg }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [f, setF] = useState(() => ({
     comingSoon: !!tour.comingSoon,
     emoji: tour.emoji || "",
@@ -147,11 +193,32 @@ function TourEditor({ tour, onChanged, setMsg }) {
     notIncluded: toLines(tour.notIncluded),
     breakdown: toLines(tour.breakdown),
     notes: toLines(tour.notes),
-    sort: tour.sort ?? 0,
   }));
 
   const set = (k) => (e) =>
     setF((prev) => ({ ...prev, [k]: e.target.type === "checkbox" ? e.target.checked : e.target.value }));
+
+  async function pickImage(e) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setUploading(true);
+    setMsg(null);
+    try {
+      const compressed = await compressImage(file);
+      const fd = new FormData();
+      fd.append("image", compressed);
+      const res = await fetch("/api/reviews/upload", { method: "POST", body: fd });
+      const data = await res.json().catch(() => ({ error: "사진 업로드에 실패했습니다." }));
+      if (!res.ok) throw new Error(data.error);
+      setF((prev) => ({ ...prev, image: data.url }));
+      setMsg({ type: "success", text: "사진을 올렸어요. 아래 저장을 눌러 반영하세요." });
+    } catch (err) {
+      setMsg({ type: "error", text: err.message || "사진 업로드에 실패했습니다." });
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function save() {
     setBusy(true);
@@ -180,10 +247,11 @@ function TourEditor({ tour, onChanged, setMsg }) {
         data.breakdown = fromLines(f.breakdown);
         data.notes = fromLines(f.notes);
       }
+      // 순서(sort)는 ▲▼ 버튼으로만 바꾸므로 여기선 건드리지 않습니다.
       const res = await fetch(`/api/tours/${tour.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data, sort: Number(f.sort) }),
+        body: JSON.stringify({ data }),
       });
       const out = await res.json();
       if (!res.ok) throw new Error(out.error);
@@ -213,30 +281,91 @@ function TourEditor({ tour, onChanged, setMsg }) {
 
   return (
     <div className="review-form" style={{ marginBottom: 16 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }} onClick={() => setOpen((v) => !v)}>
-        <strong>
-          {f.comingSoon ? "🔒 " : ""}{f.title || tour.id}
-          <span style={{ color: "var(--muted)", fontWeight: 400 }}> · {tour.id}</span>
-        </strong>
-        <span className="link-btn">{open ? "접기 ▲" : "펼쳐서 편집 ▼"}</span>
+      <div className="tour-editor-head">
+        <div className="reorder">
+          <button
+            type="button"
+            className="reorder-btn"
+            onClick={() => onMove(index, -1)}
+            disabled={index === 0 || reordering}
+            aria-label="위로 이동"
+            title="위로 이동"
+          >
+            ▲
+          </button>
+          <span className="reorder-pos">{index + 1}</span>
+          <button
+            type="button"
+            className="reorder-btn"
+            onClick={() => onMove(index, 1)}
+            disabled={index === total - 1 || reordering}
+            aria-label="아래로 이동"
+            title="아래로 이동"
+          >
+            ▼
+          </button>
+        </div>
+
+        <div className="tour-editor-title" onClick={() => setOpen((v) => !v)}>
+          <strong>
+            {f.comingSoon ? "🔒 " : ""}{f.title || tour.id}
+            <span style={{ color: "var(--muted)", fontWeight: 400 }}> · {tour.id}</span>
+          </strong>
+          <span className="link-btn">{open ? "접기 ▲" : "펼쳐서 편집 ▼"}</span>
+        </div>
       </div>
 
       {open && (
         <div style={{ marginTop: 16 }}>
-          <label className="field" style={{ display: "block" }}>
-            <input type="checkbox" checked={f.comingSoon} onChange={set("comingSoon")} /> 곧 공개(티저) 상품으로 표시
+          <label className="toggle-row">
+            <input type="checkbox" checked={f.comingSoon} onChange={set("comingSoon")} />
+            <span className="toggle-text">
+              <b>‘곧 공개 예정’(티저) 상품으로 표시</b>
+              <small>체크하면 가격·일정 없이 <b>🔒 곧 공개</b> 카드로만 보여요. 실제 판매 중인 상품은 체크를 해제하세요.</small>
+            </span>
           </label>
+
+          {/* 대표 사진: 후기처럼 직접 업로드 */}
+          <div className="field">
+            <label>대표 사진</label>
+            <div className="tour-img-uploader">
+              {f.image ? (
+                <div className="tour-img-preview">
+                  <img src={f.image} alt="대표 사진 미리보기" />
+                  <button
+                    type="button"
+                    className="preview-remove"
+                    onClick={() => setF((p) => ({ ...p, image: "" }))}
+                    aria-label="사진 제거"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <div className="tour-img-empty">
+                  <span className="tie-emoji">{f.emoji || "🌄"}</span>
+                  <span className="tie-text">등록된 사진 없음</span>
+                </div>
+              )}
+              <label className="btn btn-ghost photo-upload-btn">
+                {uploading ? "업로드 중..." : f.image ? "📷 다른 사진으로 변경" : "📷 사진 업로드"}
+                <input type="file" accept="image/*" onChange={pickImage} hidden disabled={uploading} />
+              </label>
+            </div>
+            <p className="section-sub" style={{ fontSize: 12, marginTop: 6 }}>
+              가로로 긴 사진이 가장 예쁘게 나와요. 업로드 후 꼭 아래 <b>저장</b>을 눌러주세요.
+            </p>
+          </div>
 
           <div className="field-row">
             <div className="field"><label>뱃지</label><input value={f.badge} onChange={set("badge")} placeholder="당일 / 1박 2일 / COMING SOON" /></div>
-            <div className="field"><label>이모지(사진 없을 때)</label><input value={f.emoji} onChange={set("emoji")} placeholder="🌄" /></div>
+            <div className="field"><label>이모지(사진 없을 때 표시)</label><input value={f.emoji} onChange={set("emoji")} placeholder="🌄" /></div>
           </div>
           <div className="field"><label>상품명</label><input value={f.title} onChange={set("title")} /></div>
           <div className="field-row">
             <div className="field"><label>지역</label><input value={f.region} onChange={set("region")} /></div>
             <div className="field"><label>기간</label><input value={f.duration} onChange={set("duration")} /></div>
           </div>
-          <div className="field"><label>대표 이미지 URL</label><input value={f.image} onChange={set("image")} placeholder="https://..." /></div>
           <div className="field"><label>요약 설명</label><textarea value={f.summary} onChange={set("summary")} /></div>
 
           {!f.comingSoon && (
@@ -257,8 +386,6 @@ function TourEditor({ tour, onChanged, setMsg }) {
               <div className="field"><label>예약 전 확인사항 (한 줄에 하나)</label><textarea value={f.notes} onChange={set("notes")} style={{ minHeight: 120 }} /></div>
             </>
           )}
-
-          <div className="field" style={{ maxWidth: 160 }}><label>정렬 순서(작을수록 앞)</label><input type="number" value={f.sort} onChange={set("sort")} /></div>
 
           <div style={{ display: "flex", gap: 10 }}>
             <button className="btn" onClick={save} disabled={busy}>{busy ? "저장 중..." : "저장"}</button>
