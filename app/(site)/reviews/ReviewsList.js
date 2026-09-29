@@ -25,6 +25,10 @@ export default function ReviewsList() {
   }
 
   useEffect(() => {
+    // 다른 페이지(메인 등)에서 넘어올 때 항상 맨 위에서 시작
+    try {
+      window.scrollTo(0, 0);
+    } catch {}
     load();
     // 관리자 로그인 여부 확인 (로그인 시 비번 없이 관리 + 답글 가능)
     fetch("/api/admin/me", { cache: "no-store" })
