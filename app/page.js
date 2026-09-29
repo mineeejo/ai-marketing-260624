@@ -247,7 +247,6 @@ export default async function LandingPage() {
           </div>
           <div style={{ textAlign: "left" }}>
             <p>💬 카카오톡 ID: <span style={{ color: "#fff", fontWeight: 700 }}>{KAKAO_ID}</span> (할인·예약 문의)</p>
-            <p>라스베가스 스트립 내 호텔 픽업</p>
             <div className="fnav">
               <a href="#tours">투어 상품</a>
               <a href="#why">왜 조이감성투어인가요?</a>

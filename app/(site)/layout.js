@@ -18,7 +18,6 @@ export default function SiteLayout({ children }) {
           </div>
           <div className="footer-meta">
             <p>💬 카카오톡 ID: 2050hj (할인·예약 문의)</p>
-            <p>라스베가스 스트립 내 호텔 픽업</p>
             <p className="copyright">
               © {new Date().getFullYear()} 조이감성투어. All rights reserved.
             </p>

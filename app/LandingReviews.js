@@ -59,10 +59,10 @@ export default function LandingReviews({ reviews }) {
               {r.admin_reply && (
                 <div className="admin-reply">
                   <div className="ar-head">🧑‍💼 사장님 답글</div>
-                  <p className="ar-body lp-rv-clamp">{r.admin_reply}</p>
+                  <p className="ar-body lp-rv-clamp-sm">{r.admin_reply}</p>
                 </div>
               )}
-              <span className="lp-rv-detail">후기 자세히 보기 →</span>
+              <span className="lp-rv-detail">더보기 →</span>
             </button>
           );
         })}
