@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { KAKAO_ID } from "../../lib/site";
 import { tours, formatPrice } from "../../lib/tours";
+import { pageMeta } from "../../lib/seo";
 
-export const metadata = {
-  title: "예약 · 문의 | 조이감성투어",
+export const metadata = pageMeta({
+  title: "조이감성투어 예약·문의",
   description: "그랜드캐년 투어 예약·할인 문의는 카카오톡으로. Kakao ID : 2050hj",
-};
+  path: "/book",
+});
 
 const KAKAO_REASONS = [
   {

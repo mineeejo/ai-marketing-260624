@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { MAX_IMAGES } from "./shared";
 import { compressImage } from "../../lib/compressImage";
 
+export const MAX_CONTENT = 500; // 후기 내용 최대 글자수
+
 // 사진을 한 장씩 업로드해 URL 배열을 받아옵니다. (Vercel 요청 용량 한계 회피)
 export async function uploadImages(files) {
   const urls = [];
@@ -26,6 +28,7 @@ export default function ReviewForm() {
   const [submitting, setSubmitting] = useState(false);
   const [msg, setMsg] = useState(null);
   const [previews, setPreviews] = useState([]); // [{ file, url }]
+  const [contentLen, setContentLen] = useState(0);
 
   function addFiles(e) {
     const picked = Array.from(e.target.files || []);
@@ -105,10 +108,14 @@ export default function ReviewForm() {
         <textarea
           id="content"
           name="content"
-          maxLength={2000}
+          maxLength={MAX_CONTENT}
           required
           placeholder="여행은 어떠셨나요? 솔직한 후기를 남겨주세요."
+          onChange={(e) => setContentLen(e.target.value.length)}
         />
+        <div className="char-count">
+          {contentLen} / {MAX_CONTENT}자
+        </div>
       </div>
 
       <div className="field">

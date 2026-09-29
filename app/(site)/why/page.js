@@ -1,7 +1,10 @@
-export const metadata = {
-  title: "왜 조이감성투어 | 조이감성투어",
+import { pageMeta } from "../../lib/seo";
+
+export const metadata = pageMeta({
+  title: "조이감성투어 · 왜 조이감성투어인가요?",
   description: "편안한 차량, 베테랑 가이드의 스토리텔링, 인생샷 명당까지 — 조이감성투어를 추천하는 이유.",
-};
+  path: "/why",
+});
 
 const WHY = [
   {

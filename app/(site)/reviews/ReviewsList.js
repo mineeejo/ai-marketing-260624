@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { MAX_IMAGES, Gallery, formatDate } from "./shared";
-import { uploadImages } from "./ReviewForm";
+import { uploadImages, MAX_CONTENT } from "./ReviewForm";
 
 export default function ReviewsList() {
   const [reviews, setReviews] = useState([]);
@@ -75,6 +75,7 @@ function ReviewItem({ review, isAdmin, onUpdated, onDeleted }) {
   const [keptUrls, setKeptUrls] = useState([]); // 유지할 기존 사진
   const [editPreviews, setEditPreviews] = useState([]); // 새로 추가한 사진 [{file,url}]
   const [editPassword, setEditPassword] = useState(""); // 진입 시 확인된 비밀번호
+  const [editContentLen, setEditContentLen] = useState(0);
 
   async function openEdit() {
     let pw = "";
@@ -101,6 +102,7 @@ function ReviewItem({ review, isAdmin, onUpdated, onDeleted }) {
     setEditPassword(pw);
     setKeptUrls(Array.isArray(review.image_urls) ? review.image_urls : []);
     setEditPreviews([]);
+    setEditContentLen((review.content || "").length);
     setErr(null);
     setEditing(true);
   }
@@ -234,7 +236,16 @@ function ReviewItem({ review, isAdmin, onUpdated, onDeleted }) {
         {err && <p className="form-msg error">{err}</p>}
         <div className="field">
           <label>후기 내용</label>
-          <textarea name="content" maxLength={2000} required defaultValue={review.content} />
+          <textarea
+            name="content"
+            maxLength={MAX_CONTENT}
+            required
+            defaultValue={review.content}
+            onChange={(e) => setEditContentLen(e.target.value.length)}
+          />
+          <div className="char-count">
+            {editContentLen} / {MAX_CONTENT}자
+          </div>
         </div>
         <div className="field">
           <label>사진 (최대 {MAX_IMAGES}장)</label>

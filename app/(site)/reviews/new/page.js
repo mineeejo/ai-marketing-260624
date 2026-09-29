@@ -1,10 +1,13 @@
 import Link from "next/link";
 import ReviewForm from "../ReviewForm";
 
-export const metadata = {
-  title: "리뷰 쓰기 | 조이감성투어",
+import { pageMeta } from "../../../lib/seo";
+
+export const metadata = pageMeta({
+  title: "조이감성투어 후기 쓰기",
   description: "여행 후기를 남겨보세요. 비밀번호(숫자 4자리)로 나중에 수정·삭제할 수 있습니다.",
-};
+  path: "/reviews/new",
+});
 
 export default function NewReviewPage() {
   return (

@@ -3,10 +3,13 @@ import { formatPrice } from "../../lib/tours";
 import { getTours } from "../../lib/toursDb";
 import { KAKAO_ID } from "../../lib/site";
 
-export const metadata = {
-  title: "투어 상품 | 그랜드캐년 투어",
-  description: "그랜드캐년을 즐기는 다양한 투어 코스를 만나보세요.",
-};
+import { pageMeta } from "../../lib/seo";
+
+export const metadata = pageMeta({
+  title: "조이감성투어 투어 상품",
+  description: "라스베가스 출발 그랜드캐년 당일·1박2일 투어 코스. 카톡 예약 시 할인.",
+  path: "/tours",
+});
 
 export const dynamic = "force-dynamic"; // 관리자 편집이 바로 반영되도록
 

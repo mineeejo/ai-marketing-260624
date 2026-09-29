@@ -1,10 +1,13 @@
 import Link from "next/link";
 import ReviewsList from "./ReviewsList";
 
-export const metadata = {
-  title: "고객 후기 | 조이감성투어",
-  description: "먼저 다녀온 여행자들의 생생한 후기. 사진과 함께 남긴 리뷰를 확인하세요.",
-};
+import { pageMeta } from "../../lib/seo";
+
+export const metadata = pageMeta({
+  title: "조이감성투어 고객 후기",
+  description: "먼저 다녀온 여행자들의 생생한 그랜드캐년 투어 후기. 사진과 함께 확인하세요.",
+  path: "/reviews",
+});
 
 export default function ReviewsPage() {
   return (

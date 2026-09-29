@@ -3,16 +3,19 @@ import { notFound } from "next/navigation";
 import { formatPrice } from "../../../lib/tours";
 import { getTourById } from "../../../lib/toursDb";
 import { KAKAO_ID } from "../../../lib/site";
+import { pageMeta } from "../../../lib/seo";
 
 export const dynamic = "force-dynamic"; // 관리자 편집이 바로 반영되도록
 
 export async function generateMetadata({ params }) {
   const tour = await getTourById(params.id);
   if (!tour) return { title: "상품을 찾을 수 없습니다 | 조이감성투어" };
-  return {
+  return pageMeta({
     title: `${tour.title} | 조이감성투어`,
     description: tour.summary,
-  };
+    path: `/tours/${tour.id}`,
+    image: tour.image || undefined,
+  });
 }
 
 export default async function TourDetailPage({ params }) {
