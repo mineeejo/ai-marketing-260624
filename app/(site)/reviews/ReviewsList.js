@@ -266,12 +266,18 @@ function ReviewItem({ review, isAdmin, onUpdated, onDeleted }) {
 
   return (
     <div className="review-item">
-      <div className="top">
-        <span className="who">{review.name}</span>
-        <span className="when">
-          {formatDate(review.created_at)}
-          {review.updated_at && review.updated_at !== review.created_at ? " (수정됨)" : ""}
-        </span>
+      <div className="rv-head">
+        <div className="rv-row">
+          <span className="rv-label">작성자</span>
+          <span className="who">{review.name}</span>
+        </div>
+        <div className="rv-row">
+          <span className="rv-label">작성일</span>
+          <span className="when">
+            {formatDate(review.created_at)}
+            {review.updated_at && review.updated_at !== review.created_at ? " (수정됨)" : ""}
+          </span>
+        </div>
       </div>
       <p className="content">{review.content}</p>
       <Gallery urls={review.image_urls} />

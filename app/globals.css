@@ -1033,3 +1033,10 @@ a {
 .photo-add-tile:hover{border-color:var(--accent);color:var(--accent-dark);background:var(--accent-soft);}
 .photo-add-tile .pa-plus{font-size:24px;line-height:1;font-weight:700;}
 .photo-add-tile .pa-text{font-size:12px;font-weight:700;}
+
+/* 후기 헤더 (작성자 / 작성일 구분) */
+.rv-head{display:flex;flex-wrap:wrap;gap:6px 20px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.rv-head .rv-row{display:flex;align-items:center;gap:8px;}
+.rv-head .rv-label{font-size:11px;font-weight:700;background:var(--accent-soft);color:var(--accent-dark);padding:3px 9px;border-radius:6px;white-space:nowrap;}
+.rv-head .who{font-family:var(--font-display);font-size:16px;}
+.rv-head .when{color:var(--muted);font-size:14px;}

@@ -36,9 +36,15 @@ export default function LandingReviews({ reviews }) {
               className="review-item lp-rv-card"
               onClick={() => setActive(r)}
             >
-              <div className="top">
-                <span className="who">{r.name}</span>
-                <span className="when">{fmt(r.created_at)}</span>
+              <div className="rv-head">
+                <div className="rv-row">
+                  <span className="rv-label">작성자</span>
+                  <span className="who">{r.name}</span>
+                </div>
+                <div className="rv-row">
+                  <span className="rv-label">작성일</span>
+                  <span className="when">{fmt(r.created_at)}</span>
+                </div>
               </div>
               <p className="content lp-rv-clamp">{r.content}</p>
               {photos.length > 0 && (
@@ -81,11 +87,17 @@ export default function LandingReviews({ reviews }) {
             >
               ✕
             </button>
-            <div className="top">
-              <span className="who">{active.name}</span>
-              <span className="when">{fmt(active.created_at)}</span>
+            <div className="rv-head" style={{ marginTop: 8 }}>
+              <div className="rv-row">
+                <span className="rv-label">작성자</span>
+                <span className="who">{active.name}</span>
+              </div>
+              <div className="rv-row">
+                <span className="rv-label">작성일</span>
+                <span className="when">{fmt(active.created_at)}</span>
+              </div>
             </div>
-            <p className="content" style={{ marginTop: 8, whiteSpace: "pre-wrap" }}>
+            <p className="content" style={{ whiteSpace: "pre-wrap" }}>
               {active.content}
             </p>
             <Gallery urls={active.image_urls} />
