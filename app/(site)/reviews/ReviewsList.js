@@ -168,9 +168,7 @@ function ReviewItem({ review, isAdmin, onUpdated, onDeleted }) {
     if (isAdmin) {
       if (!window.confirm("이 후기를 삭제할까요? (관리자 권한)")) return;
     } else {
-      const pw = window.prompt(
-        "삭제하려면 비밀번호를 입력하세요.\n(작성 시 등록한 4자리 · 관리자는 관리자 비밀번호)"
-      );
+      const pw = window.prompt("후기를 삭제하려면 비밀번호(4자리)를 입력하세요.");
       if (pw == null) return;
       url += `?password=${encodeURIComponent(pw)}`;
     }
