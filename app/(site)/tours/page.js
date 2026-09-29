@@ -4,6 +4,7 @@ import { getTours } from "../../lib/toursDb";
 import { KAKAO_ID } from "../../lib/site";
 
 import { pageMeta } from "../../lib/seo";
+import AdminToursButton from "../../AdminToursButton";
 
 export const metadata = pageMeta({
   title: "조이감성투어 투어 상품",
@@ -22,6 +23,10 @@ export default async function ToursPage() {
         그랜드캐년을 가장 멋지게 즐기는 코스를 골라보세요. 카톡(ID: {KAKAO_ID}) 직접 예약 시
         투어비 할인 혜택이 있습니다.
       </p>
+
+      <div style={{ marginBottom: 20 }}>
+        <AdminToursButton />
+      </div>
 
       <div className="tour-grid">
         {tours.map((t) =>

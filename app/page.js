@@ -4,6 +4,7 @@ import { formatPrice } from "./lib/tours";
 import { getTours } from "./lib/toursDb";
 import { getRecentReviews } from "./lib/reviewsDb";
 import LandingReviews from "./LandingReviews";
+import AdminToursButton from "./AdminToursButton";
 
 // 배경 영상 (Higgsfield로 생성한 그랜드캐년 골든아워 항공 영상)
 const VIDEO_URL =
@@ -145,7 +146,8 @@ export default async function LandingPage() {
             )
           )}
         </div>
-        <div style={{ textAlign: "center" }}>
+        <div style={{ textAlign: "center", display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+          <AdminToursButton />
           <Link href="/tours" className="lp-more">투어 상품 전체 보기 →</Link>
         </div>
       </section>

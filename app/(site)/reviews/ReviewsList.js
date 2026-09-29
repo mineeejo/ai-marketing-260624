@@ -52,7 +52,7 @@ export default function ReviewsList() {
   return (
     <div className="review-list">
       {isAdmin && (
-        <p className="admin-flag">🧑‍💼 관리자 모드 · 모든 후기를 비밀번호 없이 관리하고 답글을 달 수 있어요.</p>
+        <p className="admin-flag">🧑‍💼 모든 후기를 비밀번호 없이 관리하고 답글을 달 수 있어요.</p>
       )}
       {reviews.map((r) => (
         <ReviewItem
