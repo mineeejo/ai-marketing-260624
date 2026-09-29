@@ -51,6 +51,18 @@ export async function POST(request) {
       return NextResponse.json({ ok: true, count: rows.length });
     }
 
+    // 코드 최신본으로 새로고침(resync) — 기본 상품(day, 2d1n, coming-*)을
+    // 최신 코드 데이터로 덮어씁니다. 직접 추가한 다른 상품은 그대로 유지됩니다.
+    if (body.resync) {
+      const rows = defaultTours.map((t, i) => {
+        const { id, ...data } = t;
+        return { id, sort: i, data };
+      });
+      const { error } = await supabase.from("tours").upsert(rows, { onConflict: "id" });
+      if (error) throw error;
+      return NextResponse.json({ ok: true, count: rows.length });
+    }
+
     // 새 상품 생성
     const id = String(body.id ?? "").trim();
     if (!/^[a-z0-9-]{2,40}$/.test(id)) {

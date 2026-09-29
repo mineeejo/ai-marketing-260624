@@ -66,6 +66,25 @@ export default function AdminToursPage() {
     loadAll();
   }
 
+  async function handleResync() {
+    if (
+      !window.confirm(
+        "코드에 저장된 최신 상품 내용으로 새로고침할까요?\n\n· 그랜드캐년 당일/1박2일, ‘곧 공개’ 카드가 최신 문구·가격으로 덮어써집니다.\n· 여기서 직접 추가한 다른 상품은 그대로 유지됩니다.\n· 직접 수정하신 기본 상품 내용은 최신 코드값으로 되돌아갑니다."
+      )
+    )
+      return;
+    setMsg(null);
+    const res = await fetch("/api/tours", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ resync: true }),
+    });
+    const data = await res.json();
+    if (!res.ok) return setMsg({ type: "error", text: data.error });
+    setMsg({ type: "success", text: "최신 상품 내용으로 새로고침했어요. 홈·투어 상품 페이지에 바로 반영됩니다. ✅" });
+    loadAll();
+  }
+
   async function handleAdd() {
     const id = window.prompt("새 상품 ID (영문 소문자·숫자·하이픈, 예: winter-special)");
     if (!id) return;
@@ -149,8 +168,9 @@ export default function AdminToursPage() {
           <div className="admin-hint">
             💡 카드의 <b>▲▼</b> 버튼으로 노출 순서를 바꿀 수 있어요. 위에 있을수록 홈·상품 페이지에서 먼저 보입니다.
           </div>
-          <div style={{ margin: "8px 0 20px" }}>
+          <div style={{ margin: "8px 0 20px", display: "flex", gap: 10, flexWrap: "wrap" }}>
             <button className="btn btn-ghost" onClick={handleAdd}>＋ 새 상품 추가</button>
+            <button className="btn btn-ghost" onClick={handleResync} title="코드에 저장된 최신 상품 내용으로 되돌립니다">🔄 최신 내용으로 새로고침</button>
           </div>
           {tours.map((t, i) => (
             <TourEditor
@@ -191,7 +211,7 @@ function TourEditor({ tour, index, total, reordering, onMove, onChanged, setMsg 
     itinerary: itinToText(tour.itinerary),
     included: toLines(tour.included),
     notIncluded: toLines(tour.notIncluded),
-    breakdown: toLines(tour.breakdown),
+    breakdown: toLines(tour.priceBreakdown),
     notes: toLines(tour.notes),
   }));
 
@@ -244,7 +264,7 @@ function TourEditor({ tour, index, total, reordering, onMove, onChanged, setMsg 
         data.itinerary = textToItin(f.itinerary);
         data.included = fromLines(f.included);
         data.notIncluded = fromLines(f.notIncluded);
-        data.breakdown = fromLines(f.breakdown);
+        data.priceBreakdown = fromLines(f.breakdown);
         data.notes = fromLines(f.notes);
       }
       // 순서(sort)는 ▲▼ 버튼으로만 바꾸므로 여기선 건드리지 않습니다.
