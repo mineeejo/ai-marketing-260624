@@ -36,16 +36,6 @@ export default function LandingReviews({ reviews }) {
               className="review-item lp-rv-card"
               onClick={() => setActive(r)}
             >
-              <div className="rv-head">
-                <div className="rv-row">
-                  <span className="rv-label">작성자</span>
-                  <span className="who">{r.name}</span>
-                </div>
-                <div className="rv-row">
-                  <span className="rv-label">작성일</span>
-                  <span className="when">{fmt(r.created_at)}</span>
-                </div>
-              </div>
               <p className="content lp-rv-clamp">{r.content}</p>
               {photos.length > 0 && (
                 <div className="lp-rv-photos">
