@@ -98,7 +98,7 @@ export default function LandingReviews({ reviews }) {
               </div>
             )}
             <div style={{ marginTop: 18, display: "flex", gap: 10 }}>
-              <Link href="/reviews" className="lp-more">후기 게시판에서 보기 →</Link>
+              <Link href="/reviews" className="lp-more">고객 후기 전체 보기 →</Link>
               <button className="lp-more ghost" onClick={() => setActive(null)}>닫기</button>
             </div>
           </div>
