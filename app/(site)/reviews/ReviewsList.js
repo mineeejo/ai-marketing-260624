@@ -68,6 +68,43 @@ function ReviewItem({ review, isAdmin, onUpdated, onDeleted }) {
   const [replying, setReplying] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState(null);
+  const [keptUrls, setKeptUrls] = useState([]); // 유지할 기존 사진
+  const [editPreviews, setEditPreviews] = useState([]); // 새로 추가한 사진 [{file,url}]
+
+  function openEdit() {
+    setKeptUrls(Array.isArray(review.image_urls) ? review.image_urls : []);
+    setEditPreviews([]);
+    setErr(null);
+    setEditing(true);
+  }
+  function closeEdit() {
+    editPreviews.forEach((p) => URL.revokeObjectURL(p.url));
+    setEditPreviews([]);
+    setEditing(false);
+  }
+  function addEditFiles(e) {
+    const picked = Array.from(e.target.files || []);
+    setEditPreviews((prev) => {
+      const room = MAX_IMAGES - keptUrls.length - prev.length;
+      const next = picked.slice(0, Math.max(0, room)).map((file) => ({
+        file,
+        url: URL.createObjectURL(file),
+      }));
+      return [...prev, ...next];
+    });
+    e.target.value = "";
+  }
+  function removeKept(i) {
+    setKeptUrls((prev) => prev.filter((_, idx) => idx !== i));
+  }
+  function removeEditPreview(i) {
+    setEditPreviews((prev) => {
+      const copy = [...prev];
+      const [rm] = copy.splice(i, 1);
+      if (rm) URL.revokeObjectURL(rm.url);
+      return copy;
+    });
+  }
 
   async function handleEdit(e) {
     e.preventDefault();
@@ -77,17 +114,17 @@ function ReviewItem({ review, isAdmin, onUpdated, onDeleted }) {
       const fd = new FormData(e.currentTarget);
       const password = String(fd.get("password") || "");
       const content = String(fd.get("content") || "");
-      const removeImages = fd.get("removeImages") === "true";
-      const files = fd.getAll("image").filter((f) => f && f.size > 0);
-      const addImageUrls = await uploadImages(files);
+      const newUrls = await uploadImages(editPreviews.map((p) => p.file));
+      const imageUrls = [...keptUrls, ...newUrls];
 
       const res = await fetch(`/api/reviews/${review.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password, content, removeImages, addImageUrls }),
+        body: JSON.stringify({ password, content, imageUrls }),
       });
       const data = await res.json().catch(() => ({ error: "수정에 실패했습니다." }));
       if (!res.ok) throw new Error(data.error);
+      editPreviews.forEach((p) => URL.revokeObjectURL(p.url));
       onUpdated(data.review);
       setEditing(false);
     } catch (e2) {
@@ -178,17 +215,37 @@ function ReviewItem({ review, isAdmin, onUpdated, onDeleted }) {
           <label>후기 내용</label>
           <textarea name="content" maxLength={2000} required defaultValue={review.content} />
         </div>
-        {review.image_urls?.length > 0 && (
-          <div className="field">
-            <Gallery urls={review.image_urls} />
-            <label style={{ fontWeight: 400, marginTop: 6 }}>
-              <input type="checkbox" name="removeImages" value="true" /> 기존 사진 모두 삭제
-            </label>
-          </div>
-        )}
         <div className="field">
-          <label>사진 추가 (선택 · 최대 10장, 기존 사진에 이어붙임)</label>
-          <input name="image" type="file" accept="image/*" multiple />
+          <label>사진 (최대 {MAX_IMAGES}장 · 사진 위 ✕ 로 삭제)</label>
+          <input
+            id={`edit-image-${review.id}`}
+            type="file"
+            accept="image/*"
+            multiple
+            hidden
+            onChange={addEditFiles}
+            disabled={keptUrls.length + editPreviews.length >= MAX_IMAGES}
+          />
+          <div className="preview-grid">
+            {keptUrls.map((u, i) => (
+              <div key={u} className="preview-item">
+                <img src={u} alt={`사진 ${i + 1}`} />
+                <button type="button" className="preview-remove" onClick={() => removeKept(i)} aria-label="사진 제거">✕</button>
+              </div>
+            ))}
+            {editPreviews.map((p, i) => (
+              <div key={p.url} className="preview-item">
+                <img src={p.url} alt={`새 사진 ${i + 1}`} />
+                <button type="button" className="preview-remove" onClick={() => removeEditPreview(i)} aria-label="사진 제거">✕</button>
+              </div>
+            ))}
+            {keptUrls.length + editPreviews.length < MAX_IMAGES && (
+              <label htmlFor={`edit-image-${review.id}`} className="photo-add-tile">
+                <span className="pa-plus">＋</span>
+                <span className="pa-text">사진 추가</span>
+              </label>
+            )}
+          </div>
         </div>
         <div style={{ display: "flex", gap: 10 }}>
           <button className="btn" type="submit" disabled={busy}>
@@ -197,7 +254,7 @@ function ReviewItem({ review, isAdmin, onUpdated, onDeleted }) {
           <button
             type="button"
             className="btn btn-ghost"
-            onClick={() => setEditing(false)}
+            onClick={closeEdit}
             disabled={busy}
           >
             취소
@@ -267,7 +324,7 @@ function ReviewItem({ review, isAdmin, onUpdated, onDeleted }) {
             💬 답글 달기
           </button>
         )}
-        <button type="button" className="link-btn" onClick={() => setEditing(true)}>
+        <button type="button" className="link-btn" onClick={openEdit}>
           수정
         </button>
         <button type="button" className="link-btn danger" onClick={handleDelete} disabled={busy}>

@@ -14,11 +14,20 @@ const PUBLIC_COLS =
 export async function GET() {
   try {
     const supabase = getSupabase();
-    const { data, error } = await supabase
+    // 삭제(숨김)된 후기는 제외. deleted_at 컬럼이 아직 없으면 필터 없이 조회.
+    let { data, error } = await supabase
       .from("reviews")
       .select(PUBLIC_COLS)
+      .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .limit(200);
+    if (error) {
+      ({ data, error } = await supabase
+        .from("reviews")
+        .select(PUBLIC_COLS)
+        .order("created_at", { ascending: false })
+        .limit(200));
+    }
 
     if (error) throw error;
     return NextResponse.json({ reviews: data ?? [] });

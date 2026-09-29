@@ -3,6 +3,7 @@ import { KAKAO_ID } from "./lib/site";
 import { formatPrice } from "./lib/tours";
 import { getTours } from "./lib/toursDb";
 import { getRecentReviews } from "./lib/reviewsDb";
+import LandingReviews from "./LandingReviews";
 
 // 배경 영상 (Higgsfield로 생성한 그랜드캐년 골든아워 항공 영상)
 const VIDEO_URL =
@@ -176,29 +177,7 @@ export default async function LandingPage() {
           <div className="lp-h2">고객 후기</div>
           <p className="section-sub">조이감성투어와 함께한 여행자들의 생생한 후기</p>
         </div>
-        {reviews.length === 0 ? (
-          <p className="empty">아직 후기가 없어요. 첫 번째 후기를 남겨주세요! ✍️</p>
-        ) : (
-          <div className="review-list" style={{ maxWidth: 760, margin: "0 auto" }}>
-            {reviews.map((r) => (
-              <div key={r.id} className="review-item">
-                <div className="top">
-                  <span className="who">{r.name}</span>
-                </div>
-                <p className="content">{r.content}</p>
-                {Array.isArray(r.image_urls) && r.image_urls[0] && (
-                  <img className="photo" src={r.image_urls[0]} alt="후기 사진" loading="lazy" />
-                )}
-                {r.admin_reply && (
-                  <div className="admin-reply">
-                    <div className="ar-head">🧑‍💼 사장님 답글</div>
-                    <p className="ar-body">{r.admin_reply}</p>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+        <LandingReviews reviews={reviews} />
         <div style={{ textAlign: "center" }}>
           <Link href="/reviews" className="lp-more">고객 후기 전체 보기 →</Link>{" "}
           <Link href="/reviews/new" className="lp-more ghost">✍️ 리뷰 쓰기</Link>

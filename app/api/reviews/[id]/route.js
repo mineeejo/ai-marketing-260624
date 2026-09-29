@@ -71,24 +71,35 @@ export async function PATCH(request, { params }) {
       update.content = content;
     }
 
-    // 사진: removeImages(전체 삭제) + addImageUrls(기존에 이어붙임)
-    const removeImages = body.removeImages === true;
-    const addUrls = Array.isArray(body.addImageUrls)
-      ? body.addImageUrls.filter((u) => typeof u === "string" && u)
-      : [];
+    // 사진 처리
     const existing = Array.isArray(row.image_urls) ? row.image_urls : [];
-    if (removeImages || addUrls.length > 0) {
-      const kept = removeImages ? [] : existing;
-      const combined = [...kept, ...addUrls];
-      if (combined.length > MAX_IMAGES) {
-        return NextResponse.json(
-          { error: `사진은 최대 ${MAX_IMAGES}장까지 첨부할 수 있습니다.` },
-          { status: 400 }
-        );
-      }
-      const removed = existing.filter((u) => !combined.includes(u));
+    if (Array.isArray(body.imageUrls)) {
+      // 최종 사진 목록을 통째로 받음 (개별 삭제 + 새 사진 반영)
+      const desired = body.imageUrls
+        .filter((u) => typeof u === "string" && u)
+        .slice(0, MAX_IMAGES);
+      const removed = existing.filter((u) => !desired.includes(u));
       for (const u of removed) await deleteReviewImage(supabase, u);
-      update.image_urls = combined;
+      update.image_urls = desired;
+    } else {
+      // (구버전 호환) removeImages(전체 삭제) + addImageUrls(이어붙임)
+      const removeImages = body.removeImages === true;
+      const addUrls = Array.isArray(body.addImageUrls)
+        ? body.addImageUrls.filter((u) => typeof u === "string" && u)
+        : [];
+      if (removeImages || addUrls.length > 0) {
+        const kept = removeImages ? [] : existing;
+        const combined = [...kept, ...addUrls];
+        if (combined.length > MAX_IMAGES) {
+          return NextResponse.json(
+            { error: `사진은 최대 ${MAX_IMAGES}장까지 첨부할 수 있습니다.` },
+            { status: 400 }
+          );
+        }
+        const removed = existing.filter((u) => !combined.includes(u));
+        for (const u of removed) await deleteReviewImage(supabase, u);
+        update.image_urls = combined;
+      }
     }
 
     if (Object.keys(update).length === 0) {
@@ -123,9 +134,20 @@ export async function DELETE(request, { params }) {
     const password = new URL(request.url).searchParams.get("password") ?? "";
     const { row } = await authorize(supabase, params.id, password, request);
 
-    const { error } = await supabase.from("reviews").delete().eq("id", params.id);
+    // 소프트 삭제: 화면에서만 숨기고 DB에는 보관(복구 가능). 사진도 보관.
+    let { error } = await supabase
+      .from("reviews")
+      .update({ deleted_at: new Date().toISOString() })
+      .eq("id", params.id);
+
+    if (error) {
+      // deleted_at 컬럼이 아직 없으면 기존 방식(완전 삭제)으로 폴백
+      ({ error } = await supabase.from("reviews").delete().eq("id", params.id));
+      if (!error) {
+        for (const u of row.image_urls || []) await deleteReviewImage(supabase, u);
+      }
+    }
     if (error) throw error;
-    for (const u of row.image_urls || []) await deleteReviewImage(supabase, u);
 
     return NextResponse.json({ ok: true });
   } catch (err) {

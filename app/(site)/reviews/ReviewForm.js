@@ -112,35 +112,37 @@ export default function ReviewForm() {
       </div>
 
       <div className="field">
-        <label htmlFor="image">
-          사진 첨부 (선택 · 최대 {MAX_IMAGES}장 · 업로드 시 자동 압축)
-        </label>
+        <label>사진 첨부 (선택 · 최대 {MAX_IMAGES}장)</label>
         <input
           id="image"
-          name="image"
           type="file"
           accept="image/*"
           multiple
           onChange={addFiles}
           disabled={previews.length >= MAX_IMAGES}
+          hidden
         />
-        {previews.length > 0 && (
-          <div className="preview-grid">
-            {previews.map((p, i) => (
-              <div key={p.url} className="preview-item">
-                <img src={p.url} alt={`선택한 사진 ${i + 1}`} />
-                <button
-                  type="button"
-                  className="preview-remove"
-                  onClick={() => removeAt(i)}
-                  aria-label="사진 제거"
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="preview-grid">
+          {previews.map((p, i) => (
+            <div key={p.url} className="preview-item">
+              <img src={p.url} alt={`선택한 사진 ${i + 1}`} />
+              <button
+                type="button"
+                className="preview-remove"
+                onClick={() => removeAt(i)}
+                aria-label="사진 제거"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+          {previews.length < MAX_IMAGES && (
+            <label htmlFor="image" className="photo-add-tile">
+              <span className="pa-plus">＋</span>
+              <span className="pa-text">사진 추가</span>
+            </label>
+          )}
+        </div>
         {previews.length > 0 && (
           <p className="section-sub" style={{ fontSize: 13, marginTop: 8 }}>
             {previews.length} / {MAX_IMAGES}장 선택됨
